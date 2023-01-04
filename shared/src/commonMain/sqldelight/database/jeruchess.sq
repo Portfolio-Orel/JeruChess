@@ -1,0 +1,40 @@
+CREATE TABLE  userEntity(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    lastName TEXT NOT NULL,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL,
+    phone TEXT NOT NULL
+);
+
+CREATE TABLE chessUserData(
+    userId TEXT NOT NULL PRIMARY KEY AUTOINCREMENT,
+    rating INTEGER NOT NULL DEFAULT 0,
+    FOREIGN KEY (userId) REFERENCES userEntity(id) ON DELETE CASCADE
+);
+
+insertUser:
+INSERT OR REPLACE
+ INTO userEntity (
+    id,
+    name,
+    lastName,
+    email,
+    password,
+    phone
+) VALUES (?, ?, ?, ?, ?, ?);
+
+insertChessUserData:
+INSERT OR REPLACE
+ INTO chessUserData (
+    userId,
+    rating
+) VALUES (?, ?);
+
+getUser:
+SELECT *
+FROM userEntity
+JOIN chessUserData
+ON userEntity.id = chessUserData.userId
+WHERE userEntity.id = ?;
+
