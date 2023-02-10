@@ -6,7 +6,7 @@ import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.core.util.toCommonFlow
 import com.orels.jeruchess.database.JeruChessDatabase
 import com.squareup.sqldelight.runtime.coroutines.asFlow
-import com.squareup.sqldelight.runtime.coroutines.mapToOne
+import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull
 import kotlinx.coroutines.flow.map
 
 class SqlDelightAuthDataSource(
@@ -14,10 +14,10 @@ class SqlDelightAuthDataSource(
 ) : AuthDataSource {
 
     private val queries = db.jeruchessQueries
-    override fun getUser(): CommonFlow<User> = queries.getUser()
+    override fun getUser(): CommonFlow<User?> = queries.getUser()
         .asFlow()
-        .mapToOne()
-        .map { userEntity -> userEntity.toUser() }
+        .mapToOneOrNull()
+        .map { userEntity -> userEntity?.toUser() }
         .toCommonFlow()
 
     override suspend fun addUser(user: User) = queries.insertUser(

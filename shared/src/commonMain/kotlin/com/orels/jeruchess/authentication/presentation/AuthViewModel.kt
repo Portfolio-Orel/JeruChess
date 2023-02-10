@@ -1,6 +1,7 @@
 package com.orels.jeruchess.authentication.presentation
 
 import com.orels.jeruchess.authentication.domain.client.AuthClient
+import com.orels.jeruchess.authentication.domain.dataSource.AuthDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(
     val client: AuthClient,
+    private val dataSource: AuthDataSource,
     private val coroutineScope: CoroutineScope?,
 ) {
 
@@ -22,23 +24,30 @@ class AuthViewModel(
     private val authJob: Job? = null
 
     fun onEvent(event: AuthEvent) {
-        when(event) {
+        when (event) {
             is AuthEvent.Login -> {
-                _state.update { it.copy(
-                    isLoading = true
-                ) }
+                _state.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
                 viewModelScope.launch {
                     try {
-                        client.login(event.username, event.password)
-                        _state.update { it.copy(
-                            isLoading = false,
-                            error = null
-                        ) }
+                        val user = client.login(event.username, event.password)
+                        user?.let { dataSource.addUser(it) }
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = null
+                            )
+                        }
                     } catch (e: Exception) {
-                        _state.update { it.copy(
-                            isLoading = false,
-                            error = e.message
-                        ) }
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = e.message
+                            )
+                        }
                     }
                 }
             }

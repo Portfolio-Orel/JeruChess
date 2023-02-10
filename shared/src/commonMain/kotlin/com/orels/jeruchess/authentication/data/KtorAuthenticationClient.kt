@@ -2,6 +2,7 @@ package com.orels.jeruchess.authentication.data
 
 import com.orels.jeruchess.authentication.domain.client.AuthClient
 import com.orels.jeruchess.authentication.domain.exceptions.InvalidUserException
+import com.orels.jeruchess.authentication.domain.model.User
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuthInvalidUserException
 import dev.gitlive.firebase.auth.auth
@@ -11,13 +12,17 @@ class KtorAuthClient(
 
     private val firebase = Firebase.auth
 
-    override suspend fun login(username: String, password: String) {
+    override suspend fun login(username: String, password: String): User? {
         try {
             val result = firebase.signInWithEmailAndPassword(username, password)
-            if (result.user != null) {
-                println("Login successful")
+            return if (result.user != null && result.user?.email != null && result.user?.uid != null) {
+                User(
+                    id = result.user!!.uid,
+                    email = result.user!!.email!!,
+                    isGuest = false
+                )
             } else {
-                println("Login failed")
+                null
             }
         } catch (e: Exception) {
             when (e) {
