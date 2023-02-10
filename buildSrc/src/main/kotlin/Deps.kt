@@ -69,6 +69,8 @@ object Deps {
     const val firebaseFirestore = "com.google.firebase:firebase-firestore-ktx:23.0.3"
     const val firebaseCrashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.2.3"
 
+    const val gitLiveAuth = "dev.gitlive:firebase-auth:1.6.2"
+
     // TESTING
     private const val assertKVersion = "0.25"
     const val assertK = "com.willowtreeapps.assertk:assertk:$assertKVersion"

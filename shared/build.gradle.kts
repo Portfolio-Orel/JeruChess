@@ -32,6 +32,8 @@ kotlin {
                 implementation(Deps.sqlDelightRuntime)
                 implementation(Deps.sqlDelightCoroutinesExtensions)
                 implementation(Deps.kotlinDateTime)
+                implementation(Deps.gitLiveAuth)
+                implementation(kotlin("script-runtime"))
             }
         }
         val commonTest by getting {

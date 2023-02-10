@@ -3,9 +3,9 @@ package com.orels.jeruchess.android.data.interactor
 import android.content.Context
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseAuthInvalidUserException
-import com.orels.jeruchess.android.domain.exceptions.InvalidUserException
+import com.orels.jeruchess.authentication.domain.exceptions.InvalidUserException
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
-import com.orels.jeruchess.core.domain.User
+import com.orels.jeruchess.authentication.domain.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 

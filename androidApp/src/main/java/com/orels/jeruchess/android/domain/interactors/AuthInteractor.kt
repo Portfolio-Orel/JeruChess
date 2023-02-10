@@ -1,6 +1,6 @@
 package com.orels.jeruchess.android.domain.interactors
 
-import com.orels.jeruchess.core.domain.User
+import com.orels.jeruchess.authentication.domain.model.User
 
 interface AuthInteractor {
     suspend fun login(email: String, password: String)

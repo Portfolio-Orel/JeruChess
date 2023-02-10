@@ -1,37 +1,24 @@
 package com.orels.jeruchess.android.presentation.login
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.orels.jeruchess.core.domain.User
-import com.orels.jeruchess.core.util.toCommonStateFlow
+import androidx.lifecycle.viewModelScope
+import com.orels.jeruchess.authentication.domain.client.AuthClient
+import com.orels.jeruchess.authentication.presentation.AuthEvent
+import com.orels.jeruchess.authentication.presentation.AuthViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModel @Inject constructor() : ViewModel() {
-    private val _state = MutableStateFlow(LoginState())
-    val state = _state.toCommonStateFlow()
+class LoginViewModel @Inject constructor(
+    private val client: AuthClient
+) : ViewModel() {
+ private val viewModel by lazy {
+     AuthViewModel(client, coroutineScope = viewModelScope)
+ }
 
-    fun onEvent(event: LoginEvents) {
-        when (event) {
-            is LoginEvents.Login -> {
-                _state.update { it.copy(isLoading = true) }
-            }
-            is LoginEvents.Register -> {
-                _state.update { it.copy(isLoading = true) }
-            }
-        }
-    }
+    val state = viewModel.state
 
-    fun onUsernameChange(username: String) {
-        _state.update { it.copy(username = username) }
-    }
-
-    fun onPasswordChange(password: String) {
-        _state.update { it.copy(password = password) }
+    fun onEvent(event: AuthEvent) {
+        viewModel.onEvent(event)
     }
 }

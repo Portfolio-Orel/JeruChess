@@ -20,12 +20,14 @@ import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.core.presentation.Routes
 import com.orels.jeruchess.android.presentation.components.Input
+import com.orels.jeruchess.android.presentation.components.Loading
 import com.orels.jeruchess.android.presentation.components.noRippleClickable
+import com.orels.jeruchess.authentication.presentation.AuthEvent
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
 ) {
     val state = viewModel.state.value
 
@@ -67,7 +69,7 @@ fun LoginScreen(
                             stringResource(R.string.username)
                         )
                     },
-                    onTextChange = { viewModel.onUsernameChange(it) }
+                    onTextChange = { }
                 )
                 Input(
                     title = stringResource(R.string.password),
@@ -80,7 +82,8 @@ fun LoginScreen(
                             stringResource(R.string.password_icon)
                         )
                     },
-                    onTextChange = { viewModel.onPasswordChange(it) })
+                    onTextChange = { }
+                )
                 Text(
                     modifier = Modifier.clickable {
                         navController.navigate(Routes.FORGOT_PASSWORD)
@@ -115,21 +118,30 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
-                    onClick = { },
+                    onClick = { viewModel.onEvent(AuthEvent.Login("orelsmail@gmail.com", "002200oO")) },
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = MaterialTheme.colors.onBackground,
                         contentColor = MaterialTheme.colors.background,
                     ),
                 ) {
-                    Text(
-                        text = stringResource(R.string.login),
-                        style = MaterialTheme.typography.body1,
-                        fontWeight = FontWeight.SemiBold,
-                    )
+                    if (state.isLoading) {
+                        Loading(
+                            modifier = Modifier
+                                .height(16.dp)
+                                .width(16.dp),
+                            color = MaterialTheme.colors.background
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(R.string.login),
+                            style = MaterialTheme.typography.body1,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                    }
                 }
                 Text(
-                    text = stringResource(state.error ?: R.string.empty_string),
+                    text = state.error ?: "",
                     style = MaterialTheme.typography.body2,
                     color = MaterialTheme.colors.error
                 )
