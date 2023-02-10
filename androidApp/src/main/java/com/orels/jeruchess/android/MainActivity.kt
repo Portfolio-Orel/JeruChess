@@ -6,12 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.orels.jeruchess.android.core.presentation.Routes
+import com.orels.jeruchess.android.presentation.forgot_password.ForgotPasswordScreen
 import com.orels.jeruchess.android.presentation.login.LoginScreen
+import com.orels.jeruchess.android.presentation.register.RegisterScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,22 +27,31 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colors.background
                 ) {
-                    LoginScreen()
+                    val navHostController = rememberNavController()
+                    val navController = navHostController as NavController
+                    NavHost(
+                        navController = navHostController,
+                        startDestination = Routes.LOGIN
+                    ) {
+                        composable(
+                            route = Routes.LOGIN,
+                        ) {
+                            LoginScreen(navController = navController)
+                        }
+                        composable(
+                            route = Routes.FORGOT_PASSWORD,
+                        ) {
+                            ForgotPasswordScreen(navController = navController)
+                        }
+                        composable(
+                            route = Routes.REGISTER,
+                        ) {
+                            RegisterScreen(navController = navController)
+                        }
+
+                    }
                 }
             }
         }
-    }
-}
-
-@Composable
-fun GreetingView(text: String) {
-    Text(text = text)
-}
-
-@Preview
-@Composable
-fun DefaultPreview() {
-    MyApplicationTheme {
-        GreetingView("Hello, Android!")
     }
 }

@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "423266329321",
+    "project_id": "jeruchess-6a10f",
+    "storage_bucket": "jeruchess-6a10f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:423266329321:android:c5f447fde7f4d3f2678678",
+        "android_client_info": {
+          "package_name": "com.orels.jeruchess.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "423266329321-1gtheoi09kk9t361tehvdo0op01agd83.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.orels.jeruchess.android",
+            "certificate_hash": "f324263bd2f85f3a201cc587f9d67334802b323a"
+          }
+        },
+        {
+          "client_id": "423266329321-k139chni37bh1rj5j2vifret3c35v6n1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASmqBiJykex8qk5x2EYwVDRN3ZZjf8wLk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "423266329321-k139chni37bh1rj5j2vifret3c35v6n1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

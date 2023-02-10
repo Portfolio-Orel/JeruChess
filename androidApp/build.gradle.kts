@@ -1,10 +1,9 @@
-import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
-
 plugins {
     id("com.android.application")
     kotlin("android")
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
+    id("com.google.gms.google-services")
     kotlin("plugin.serialization") version Deps.kotlinVersion
 }
 
@@ -47,6 +46,12 @@ dependencies {
     implementation(Deps.composeIconsExtended)
     implementation(Deps.composeNavigation)
     implementation(Deps.coilCompose)
+
+    implementation(Deps.firebaseBom)
+//    implementation(Deps.firebaseAnalytics)
+//    implementation(Deps.firebaseCrashlytics)
+    implementation(Deps.firebaseFirestore)
+    implementation(Deps.firebaseAuth)
 
     implementation(Deps.hiltAndroid)
     kapt(Deps.hiltAndroidCompiler)

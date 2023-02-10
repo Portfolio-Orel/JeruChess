@@ -11,8 +11,6 @@
     <string name="check">Check</string>
     <string name="reset_code">Reset code</string>
     <string name="insert_username">Insert username</string>
-    <string name="reset_password">Reset password</string>
-    <string name="confirm_password">Confirm password</string>
     <string name="error_username_does_not_exist">Username does not exist</string>
     <string name="new_password">New password</string>
     <string name="change_password">Change password</string>
@@ -24,4 +22,16 @@
     <string name="last_name">Last name</string>
     <string name="finish">Finish</string>
     <string name="login">Login</string>
+
+    <string name="reset_password">Reset password</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="forgot_the_password">Forgot the password?</string>
+    <string name="forgot_password_message">Don\'t worry! It happens to the best of us.\nJust enter your username and we\'ll send you a code to reset your password.</string>
+    <string name="change_the_password">Change the password</string>
+    <string name="code">code</string>
+    <string name="done_exclamation">Done!</string>
+    <string name="your_password_has_been_changed">Your password has been changed</string>
+    <string name="lets_go">Let\'s go</string>
+    <string name="dont_have_an_account">Don\'t have an account?</string>
+    <string name="sign_up">Sign up</string>
 </resources>
