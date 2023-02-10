@@ -34,4 +34,6 @@
     <string name="lets_go">Let\'s go</string>
     <string name="dont_have_an_account">Don\'t have an account?</string>
     <string name="sign_up">Sign up</string>
+    <string name="what_is_your_email">What is your email?</string>
+    <string name="next">Next</string>
 </resources>
