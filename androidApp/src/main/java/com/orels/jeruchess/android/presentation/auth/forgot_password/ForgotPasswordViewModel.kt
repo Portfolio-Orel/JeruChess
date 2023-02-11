@@ -1,4 +1,4 @@
-package com.orels.jeruchess.android.presentation.forgot_password
+package com.orels.jeruchess.android.presentation.auth.forgot_password
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf

@@ -30,7 +30,7 @@ class SqlDelightAuthDataSource(
 
     override suspend fun updateUser(user: User) = Unit
 
-    override suspend fun deleteUser(user: User) = queries.deleteUser(user.id)
+    override suspend fun deleteUser() = queries.deleteUser()
 
 
 }

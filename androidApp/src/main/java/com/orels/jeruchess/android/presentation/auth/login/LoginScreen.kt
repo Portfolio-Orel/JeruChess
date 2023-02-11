@@ -1,5 +1,6 @@
-package com.orels.jeruchess.android.presentation.login
+package com.orels.jeruchess.android.presentation.auth.login
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,14 +9,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.core.presentation.Routes
@@ -23,13 +25,21 @@ import com.orels.jeruchess.android.presentation.components.Input
 import com.orels.jeruchess.android.presentation.components.Loading
 import com.orels.jeruchess.android.presentation.components.noRippleClickable
 import com.orels.jeruchess.authentication.presentation.AuthEvent
+import com.orels.jeruchess.authentication.presentation.AuthState
 
 @Composable
 fun LoginScreen(
+    state: AuthState,
     navController: NavController,
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: LoginViewModel,
 ) {
-    val state = viewModel.state.value
+    LaunchedEffect(key1 = state.isAuthorized) {
+        if(state.isAuthorized) {
+            navController.navigate(Routes.MAIN) {
+                popUpTo(Routes.LOGIN) { inclusive = true }
+            }
+        }
+    }
 
     if (state.isLoading) {
         Box(
@@ -37,12 +47,12 @@ fun LoginScreen(
                 .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
-            CircularProgressIndicator(
+            Loading(
                 modifier = Modifier
-                    .height(48.dp)
-                    .width(48.dp),
+                    .size(48.dp)
+                    .zIndex(1f),
+                color = MaterialTheme.colors.onBackground,
                 strokeWidth = 2.dp,
-                color = MaterialTheme.colors.onBackground
             )
         }
     } else {
@@ -93,6 +103,8 @@ fun LoginScreen(
                     color = MaterialTheme.colors.onBackground.copy(alpha = 0.45f)
                 )
                 Spacer(modifier = Modifier.weight(1f))
+                AppLogo()
+                Spacer(modifier = Modifier.weight(1f))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
@@ -118,14 +130,21 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
-                    onClick = { viewModel.onEvent(AuthEvent.Login("orelsmail@gmail.com", "002200oO")) },
+                    onClick = {
+                        viewModel.onEvent(
+                            AuthEvent.Login(
+                                "orelsmail@gmail.com",
+                                "002200oO"
+                            )
+                        )
+                    },
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(
                         backgroundColor = MaterialTheme.colors.onBackground,
                         contentColor = MaterialTheme.colors.background,
                     ),
                 ) {
-                    if (state.isLoading) {
+                    if (state.isLoadingLogin) {
                         Loading(
                             modifier = Modifier
                                 .height(16.dp)
@@ -149,6 +168,28 @@ fun LoginScreen(
         }
     }
 }
+
+@Composable
+fun AppLogo() {
+    if (MaterialTheme.colors.isLight) {
+        Image(
+            painter = painterResource(id = R.drawable.jeruchess_light),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+    } else {
+        Image(
+            painter = painterResource(id = R.drawable.jeruchess_dark),
+            contentDescription = stringResource(R.string.app_name),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+    }
+}
+
 //
 //@Composable
 //fun GoogleButton(onClick: () -> Unit) {

@@ -7,8 +7,7 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.auth.FirebaseAuthInvalidUserException
 import dev.gitlive.firebase.auth.auth
 
-class KtorAuthClient(
-) : AuthClient {
+class KtorAuthClient: AuthClient {
 
     private val firebase = Firebase.auth
 
@@ -31,6 +30,9 @@ class KtorAuthClient(
             }
         }
     }
+
+    override suspend fun logout() = firebase.signOut()
+
 
 
 }

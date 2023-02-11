@@ -12,6 +12,16 @@ CREATE TABLE chessUserData(
     FOREIGN KEY (userId) REFERENCES userEntity(id) ON DELETE CASCADE
 );
 
+CREATE TABLE clubDataEntity(
+    address TEXT NOT NULL PRIMARY KEY,
+    phone TEXT,
+    email TEXT,
+    website TEXT,
+    facebook TEXT,
+    instagram TEXT,
+    twitter TEXT
+);
+
 insertUser:
 INSERT OR REPLACE
  INTO userEntity (
@@ -22,18 +32,54 @@ INSERT OR REPLACE
     phone
 ) VALUES (?, ?, ?, ?, ?);
 
+-- ChessUserData --
 insertChessUserData:
 INSERT OR REPLACE
  INTO chessUserData (
     userId,
     rating
 ) VALUES (?, ?);
+-- ChessUserData --
 
+-- User --
 getUser:
 SELECT *
 FROM userEntity;
 
 deleteUser:
-DELETE FROM userEntity
-WHERE id = ?;
+DELETE FROM userEntity;
+-- User --
+
+-- Club --
+getClub:
+SELECT *
+FROM clubDataEntity;
+
+insertClub:
+INSERT OR REPLACE
+ INTO clubDataEntity (
+    address,
+    phone,
+    email,
+    website,
+    facebook,
+    instagram,
+    twitter
+) VALUES ( ?, ?, ?, ?, ?, ?, ?);
+
+deleteClub:
+DELETE FROM clubDataEntity
+WHERE address = ?;
+
+updateClub:
+UPDATE clubDataEntity
+SET address = ?,
+    phone = ?,
+    email = ?,
+    website = ?,
+    facebook = ?,
+    instagram = ?,
+    twitter = ?;
+-- Club --
+
 

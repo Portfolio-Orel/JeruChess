@@ -6,6 +6,10 @@ import com.orels.jeruchess.authentication.data.SqlDelightAuthDataSource
 import com.orels.jeruchess.authentication.domain.dataSource.AuthDataSource
 import com.orels.jeruchess.core.data.local.DatabaseDriverFactory
 import com.orels.jeruchess.database.JeruChessDatabase
+import com.orels.jeruchess.main.data.KtorMainClient
+import com.orels.jeruchess.main.data.SqlDelightMainDataSource
+import com.orels.jeruchess.main.domain.data.MainClient
+import com.orels.jeruchess.main.domain.data.MainDataSource
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.Module
 import dagger.Provides
@@ -42,5 +46,18 @@ object AppModule {
         driver: SqlDriver,
     ): AuthDataSource {
         return SqlDelightAuthDataSource(JeruChessDatabase(driver))
+    }
+
+    @Provides
+    @Singleton
+    fun provideMainClient(
+    ): MainClient = KtorMainClient()
+
+    @Provides
+    @Singleton
+    fun provideMainDataSource(
+        driver: SqlDriver,
+    ): MainDataSource {
+        return SqlDelightMainDataSource(JeruChessDatabase(driver))
     }
 }

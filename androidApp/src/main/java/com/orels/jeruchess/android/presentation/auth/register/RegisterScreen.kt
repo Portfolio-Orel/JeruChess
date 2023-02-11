@@ -1,4 +1,4 @@
-package com.orels.jeruchess.android.presentation.register
+package com.orels.jeruchess.android.presentation.auth.register
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutLinearInEasing
