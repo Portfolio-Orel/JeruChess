@@ -65,7 +65,7 @@ INSERT OR REPLACE
     facebook,
     instagram,
     twitter
-) VALUES ( ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 deleteClub:
 DELETE FROM clubDataEntity

@@ -1,5 +1,8 @@
 package com.orels.jeruchess.android.presentation.main
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orels.jeruchess.main.domain.data.MainClient
@@ -27,5 +30,17 @@ class AndroidMainViewModel @Inject constructor(
 
     fun onEvent(event: MainEvent) {
         viewModel.onEvent(event)
+    }
+
+    fun openGoogleMaps(context: Context) {
+        val gmmIntentUri =
+            Uri.parse("geo:0,0?q=${state.value.clubData?.address}")
+        val mapIntent = Intent(Intent.ACTION_VIEW, gmmIntentUri)
+        mapIntent.setPackage("com.google.android.apps.maps")
+        try {
+            context.startActivity(mapIntent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 }

@@ -1,23 +1,20 @@
 package com.orels.jeruchess.android.presentation.main
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
-import com.orels.jeruchess.main.presentation.MainEvent
 import com.orels.jeruchess.main.presentation.MainState
 
 @Composable
@@ -26,6 +23,9 @@ fun MainScreen(
     state: MainState,
     viewModel: AndroidMainViewModel
 ) {
+
+    val context = LocalContext.current
+
     Scaffold(
         topBar = {
 
@@ -38,7 +38,7 @@ fun MainScreen(
         bottomBar = {
             BottomBar(
                 clubAddress = viewModel.state.value.clubData?.address ?: "",
-                onClick = { viewModel.onEvent(MainEvent.NavigateToClubAddress) }
+                onClick = { viewModel.openGoogleMaps(context = context) }
             )
         }
     )
@@ -50,19 +50,25 @@ fun BottomBar(
     onClick: (String) -> Unit,
 ) {
     Row(
-        modifier = Modifier.clickable(onClick = { onClick(clubAddress) })
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp)
+            .clickable(onClick = { onClick(clubAddress) }),
+        horizontalArrangement = Arrangement.End
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_location),
-            contentDescription = stringResource(
-                R.string.location_icon
-            )
-        )
         Text(
             text = clubAddress,
             style = MaterialTheme.typography.body2,
             textAlign = TextAlign.Start,
             modifier = Modifier.padding(start = 8.dp)
+        )
+        Icon(
+            modifier = Modifier.padding(start = 8.dp),
+            painter = painterResource(id = R.drawable.ic_location),
+            tint = MaterialTheme.colors.onBackground,
+            contentDescription = stringResource(
+                R.string.location_icon
+            ),
         )
     }
 }

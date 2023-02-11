@@ -11,7 +11,7 @@ class KtorMainClient : MainClient {
 
     override fun getClub(): ClubData =
         ClubData(
-            address = "בן זכאי 9, ירושלים",
+            address = "מועדון ירושחמט",
             phone = "",
             email = "",
             website = "http://www.jeruchess.com/",
