@@ -1,0 +1,23 @@
+{
+  "dev": {
+    "awscloudformation": {}
+  },
+  "deve": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-chessapp-deve-94142-authRole",
+      "UnauthRoleArn": "arn:aws:iam::965255944696:role/amplify-chessapp-deve-94142-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::965255944696:role/amplify-chessapp-deve-94142-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-chessapp-deve-94142-deployment",
+      "UnauthRoleName": "amplify-chessapp-deve-94142-unauthRole",
+      "StackName": "amplify-chessapp-deve-94142",
+      "StackId": "arn:aws:cloudformation:us-east-1:965255944696:stack/amplify-chessapp-deve-94142/888ad240-ae96-11ed-b08d-120319b93ddd",
+      "AmplifyAppId": "d2d4f02fsxgpqo"
+    },
+    "categories": {
+      "auth": {
+        "chessapp5563c474": {}
+      }
+    }
+  }
+}
