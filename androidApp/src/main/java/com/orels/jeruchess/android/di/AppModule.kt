@@ -1,6 +1,11 @@
 package com.orels.jeruchess.android.di
 
 import android.app.Application
+import com.orels.jeruchess.android.R
+import com.orels.jeruchess.android.data.interactor.AuthInteractorImpl
+import com.orels.jeruchess.android.domain.annotation.AuthConfigFile
+import com.orels.jeruchess.android.domain.interactors.AuthInteractor
+import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.authentication.data.KtorAuthClient
 import com.orels.jeruchess.authentication.data.SqlDelightAuthDataSource
 import com.orels.jeruchess.authentication.domain.dataSource.AuthDataSource
@@ -60,4 +65,16 @@ object AppModule {
     ): MainDataSource {
         return SqlDelightMainDataSource(JeruChessDatabase(driver))
     }
+
+    @Provides
+    @Singleton
+    fun provideAuthInteractor(
+        authInteractor: AuthInteractorImpl
+    ): AuthInteractor = authInteractor
+
+    @Provides
+    @AuthConfigFile
+    fun provideAuthConfigFile(
+    ): ConfigFile = ConfigFile(R.raw.dev_amplifyconfiguration)
+
 }

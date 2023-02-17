@@ -10,7 +10,6 @@ import dev.gitlive.firebase.auth.auth
 class KtorAuthClient: AuthClient {
 
     private val firebase = Firebase.auth
-
     override suspend fun login(username: String, password: String): User? {
         try {
             val result = firebase.signInWithEmailAndPassword(username, password)

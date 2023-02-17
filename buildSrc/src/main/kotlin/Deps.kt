@@ -72,6 +72,11 @@ object Deps {
     const val gitLiveAuth = "dev.gitlive:firebase-auth:1.6.2"
     const val gitLiveFirestore = "dev.gitlive:firebase-firestore:1.6.2"
 
+    // AWS
+    const val desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
+    const val amplify = "com.amplifyframework:core-kotlin:2.2.0"
+    const val cognito = "com.amplifyframework:aws-auth-cognito:2.2.0"
+
     // TESTING
     private const val assertKVersion = "0.25"
     const val assertK = "com.willowtreeapps.assertk:assertk:$assertKVersion"

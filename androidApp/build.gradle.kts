@@ -33,10 +33,16 @@ android {
             isMinifyEnabled = false
         }
     }
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation(project(":shared"))
+    implementation ("androidx.appcompat:appcompat:1.6.1")
     implementation(Deps.composeUi)
     implementation(Deps.composeUiTooling)
     implementation(Deps.composeUiToolingPreview)
@@ -48,8 +54,6 @@ dependencies {
     implementation(Deps.coilCompose)
 
     implementation(Deps.firebaseBom)
-//    implementation(Deps.firebaseAnalytics)
-//    implementation(Deps.firebaseCrashlytics)
     implementation(Deps.firebaseFirestore)
     implementation(Deps.firebaseAuth)
 
@@ -67,4 +71,10 @@ dependencies {
 
     kaptAndroidTest(Deps.hiltAndroidCompiler)
     androidTestImplementation(Deps.hiltTesting)
+
+    coreLibraryDesugaring(Deps.desugarJdkLibs)
+    implementation(Deps.amplify) {
+        exclude(group = "androidx.appcompat", module = "appcompat")
+    }
+    implementation(Deps.cognito)
 }
