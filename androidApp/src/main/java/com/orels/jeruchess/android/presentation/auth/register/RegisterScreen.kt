@@ -8,28 +8,39 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.presentation.components.ActionButton
 import com.orels.jeruchess.android.presentation.components.BackPressHandler
 import com.orels.jeruchess.android.presentation.components.Input
+import com.orels.jeruchess.utils.Validators
 
 private enum class Stage {
-    NAME, EMAIL, PASSWORD, DONE, ERROR
+    NAME, EMAIL_NUMBER, CONFIRMATION, DONE, ERROR
 }
 
 // this will show the stages order, not as a string
 private val registrationProcess: List<Stage> = listOf(
     Stage.NAME,
-    Stage.EMAIL,
-    Stage.PASSWORD,
+    Stage.EMAIL_NUMBER,
+    Stage.CONFIRMATION,
     Stage.DONE
 )
 
@@ -58,6 +69,7 @@ fun RegisterScreen(
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordConfirm by remember { mutableStateOf("") }
     var stage by remember { mutableStateOf(Stage.NAME) }
@@ -72,39 +84,37 @@ fun RegisterScreen(
         }
     }
 
+//    AnimateContent(
+//        shouldShow = stage == Stage.NAME,
+//    ) {
+//        GetName(
+//            onNameEntered = { first, last ->
+//                firstName = first
+//                lastName = last
+//                stage = stage.next()
+//            }
+//        )
+//    }
     AnimateContent(
-        shouldShow = stage == Stage.NAME,
+        shouldShow = stage == Stage.EMAIL_NUMBER,
     ) {
-        GetName(
-            onNameEntered = { first, last ->
-                firstName = first
-                lastName = last
-                stage = stage.next()
-            }
-        )
-    }
-    AnimateContent(
-        shouldShow = stage == Stage.EMAIL,
-    ) {
-        GetEmail(
-            onEmailEntered = { mail ->
+        GetEmailAndPhoneNumber(
+            onDetailsEntered = { mail, number ->
                 email = mail
+                phoneNumber = number
                 stage = stage.next()
-            }
+            },
+            validateEmail = { Validators.isEmailValid(it) },
+            validatePhoneNumber = { Validators.isPhoneNumberValid(it) }
         )
     }
 
-    AnimateContent(
-        shouldShow = stage == Stage.PASSWORD,
-    ) {
-        GetPassword(
-            onPasswordEntered = { pass, passConfirm ->
-                password = pass
-                passwordConfirm = passConfirm
-                stage = stage.next()
-            }
-        )
+    AnimateContent(shouldShow = stage == Stage.NAME) {
+        ConfirmationCodeDialog(onConfirm = {}) {
+            stage = stage.next()
+        }
     }
+
 }
 
 @Composable
@@ -135,7 +145,6 @@ fun GetName(onNameEntered: (firstName: String, lastName: String) -> Unit) {
             isPassword = false,
             onTextChange = {
                 firstName = it
-                firstNameError = false
             }
         )
         Input(
@@ -146,13 +155,14 @@ fun GetName(onNameEntered: (firstName: String, lastName: String) -> Unit) {
             isPassword = false,
             onTextChange = {
                 lastName = it
-                lastNameError = false
             }
         )
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
-                onNameEntered(firstName, lastName)
+                lastNameError = false
+                firstNameError = false
+
                 if (firstName.isNotBlank() && lastName.isNotBlank()) {
                     onNameEntered(firstName, lastName)
                 } else {
@@ -166,7 +176,13 @@ fun GetName(onNameEntered: (firstName: String, lastName: String) -> Unit) {
 
 
 @Composable
-fun GetEmail(onEmailEntered: (email: String) -> Unit) {
+fun GetEmailAndPhoneNumber(
+    onDetailsEntered: (email: String, number: String) -> Unit,
+    validateEmail: (String) -> Boolean,
+    validatePhoneNumber: (String) -> Boolean
+) {
+    var number by remember { mutableStateOf("") }
+    var numberError by remember { mutableStateOf(false) }
     var email by remember { mutableStateOf("") }
     var emailError by remember { mutableStateOf(false) }
 
@@ -194,14 +210,33 @@ fun GetEmail(onEmailEntered: (email: String) -> Unit) {
                 emailError = false
             }
         )
+        Input(
+            title = stringResource(R.string.phone_number),
+            minLines = 1,
+            maxLines = 1,
+            isError = numberError,
+            isPassword = false,
+            onTextChange = {
+                number = it
+            }
+        )
 
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
-                if (email.isNotBlank()) {
-                    onEmailEntered(email)
+                emailError = false
+                numberError = false
+                if (!validateEmail(email)) {
+                    emailError = true
+                }
+                if (!validatePhoneNumber(number)) {
+                    numberError = true
+                }
+                if (!emailError && !numberError && email.isNotBlank() && number.isNotBlank()) {
+                    onDetailsEntered(email, number)
                 } else {
                     emailError = email.isBlank()
+                    numberError = number.isBlank()
                 }
             }, text = stringResource(R.string.next)
         )
@@ -236,7 +271,6 @@ fun GetPassword(onPasswordEntered: (password: String, confirmPassword: String) -
             isPassword = false,
             onTextChange = {
                 password = it
-                passwordError = false
             }
         )
         Input(
@@ -247,12 +281,14 @@ fun GetPassword(onPasswordEntered: (password: String, confirmPassword: String) -
             isPassword = false,
             onTextChange = {
                 confirmPassword = it
-                confirmPasswordError = false
             }
         )
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
+                passwordError = false
+                confirmPasswordError = false
+
                 if (password.isNotBlank() && confirmPassword.isNotBlank()) {
                     onPasswordEntered(password, confirmPassword)
                 } else {
@@ -260,6 +296,66 @@ fun GetPassword(onPasswordEntered: (password: String, confirmPassword: String) -
                     confirmPasswordError = confirmPassword.isBlank()
                 }
             }, text = stringResource(R.string.next)
+        )
+    }
+}
+
+
+@Composable
+fun ConfirmationCodeDialog(
+    onConfirm: (code: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    val code = remember { mutableStateListOf("", "", "", "", "", "") }
+    val focusRequesters = remember { Array(6) { FocusRequester() } }
+    val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+    val spaceBetweenInputs = 4.dp
+    val inputSize = (screenWidth - spaceBetweenInputs * 12) / 6
+    val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(cursorColor = Color.Transparent)
+
+    Column {
+        Row(horizontalArrangement = Arrangement.Center) {
+            for (i in 0 until 6) {
+                OutlinedTextField(
+                    value = code[i],
+                    onValueChange = { newValue ->
+                        if (code[i].isNotEmpty() && newValue.length > 1) {
+                            code[i] = newValue.replaceFirst(code[i], "").lastOrNull().toString()
+                        } else {
+                            code[i] = newValue
+                        }
+                        if (code[i].length == 1 && i < 5) {
+                            focusRequesters[i + 1].requestFocus()
+                        }
+                    },
+                    modifier = Modifier
+                        .padding(horizontal = spaceBetweenInputs)
+                        .size(inputSize)
+                        .focusRequester(focusRequesters[i]),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(onNext = {
+                        focusRequesters[i + 1].requestFocus()
+                    }),
+                    textStyle = LocalTextStyle.current.copy(
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center
+                    ),
+                    colors = textFieldColors
+                )
+            }
+        }
+        ActionButton(
+            onClick = {
+                val fullCode = code.joinToString(separator = "")
+                onConfirm(fullCode)
+            },
+            modifier = Modifier.padding(vertical = 16.dp),
+            text = stringResource(id = R.string.confirm)
         )
     }
 }
@@ -276,7 +372,7 @@ fun AnimateContent(
             animationSpec = tween(durationMillis = 250, easing = LinearOutSlowInEasing)
         ),
         exit = slideOutHorizontally(
-            targetOffsetX = { fullWidth ->  -fullWidth },
+            targetOffsetX = { fullWidth -> -fullWidth },
             animationSpec = tween(durationMillis = 150, easing = FastOutLinearInEasing)
         )
     ) {

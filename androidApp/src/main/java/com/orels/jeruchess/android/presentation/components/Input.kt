@@ -35,8 +35,8 @@ fun Input(
     isError: Boolean = false,
     isPassword: Boolean = false,
     shouldFocus: Boolean = false,
-    leadingIcon: @Composable (() -> Unit) = { },
-    trailingIcon: @Composable (() -> Unit) = { },
+    leadingIcon: (@Composable (() -> Unit))? = null,
+    trailingIcon: (@Composable (() -> Unit))? = { },
     onTextChange: (String) -> Unit = {}
 ) {
     val value = remember { mutableStateOf(initialText) }
@@ -44,7 +44,7 @@ fun Input(
     val lineHeight = 40
     val focusRequester = FocusRequester()
 
-    var inputModifier = if(shouldFocus) Modifier.focusRequester(focusRequester) else Modifier
+    var inputModifier = if (shouldFocus) Modifier.focusRequester(focusRequester) else Modifier
 
     inputModifier =
         if (maxLines == 1) inputModifier else inputModifier.height((lineHeight * minLines).dp)
@@ -78,7 +78,7 @@ fun Input(
                             passwordVisible = passwordVisible.value,
                             onClick = { passwordVisible.value = !passwordVisible.value })
                     } else {
-                        trailingIcon()
+                        trailingIcon?.invoke()
                     }
                 },
                 leadingIcon = leadingIcon,

@@ -28,16 +28,17 @@ class LoginViewModel @Inject constructor(
 
     val state = viewModel.state
 
-    init {
+    fun loginWithGoogle(activity: Activity) {
         viewModelScope.launch {
-            authInteractor.initialize(config)
+//            authInteractor.loginWithGoogle(activity)
+            authInteractor.loginWithPhone("+972543056286")
         }
     }
 
     fun onEvent(event: AuthEvent, activity: Activity) {
         if (event is AuthEvent.Login)
             viewModelScope.launch {
-                authInteractor.login("event.email", event.password, activity)
+                authInteractor.login("event.email", event.password)
             } else {
             viewModel.onEvent(event)
         }
