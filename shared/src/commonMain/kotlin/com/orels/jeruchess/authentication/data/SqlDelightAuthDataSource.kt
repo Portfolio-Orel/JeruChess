@@ -25,7 +25,7 @@ class SqlDelightAuthDataSource(
         firstName = user.firstName,
         lastName = user.lastName,
         email = user.email,
-        phone = user.phone
+        phone = user.phoneNumber
     )
 
     override suspend fun updateUser(user: User) = Unit

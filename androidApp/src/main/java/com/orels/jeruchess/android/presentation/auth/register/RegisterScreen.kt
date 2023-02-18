@@ -18,7 +18,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -65,64 +64,73 @@ private fun Stage.previous(): Stage {
 @Composable
 fun RegisterScreen(
     navController: NavController,
+    preInsertedPhoneNumber: String,
+    preInsertedEmail: String
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var passwordConfirm by remember { mutableStateOf("") }
-    var stage by remember { mutableStateOf(Stage.NAME) }
+    var email by remember { mutableStateOf(preInsertedEmail) }
+    var phoneNumber by remember { mutableStateOf(preInsertedPhoneNumber) }
     var backPressed by remember { mutableStateOf(false) }
+    val stage = remember { mutableStateOf(Stage.NAME) }
 
     BackPressHandler {
         backPressed = true
-        if (stage != (registrationProcess.firstOrNull() ?: Stage.NAME)) {
-            stage = stage.previous()
+        if (stage.value != (registrationProcess.firstOrNull() ?: Stage.NAME)) {
+            stage.value = stage.value.previous()
         } else {
             navController.popBackStack()
         }
     }
 
-//    AnimateContent(
-//        shouldShow = stage == Stage.NAME,
-//    ) {
-//        GetName(
-//            onNameEntered = { first, last ->
-//                firstName = first
-//                lastName = last
-//                stage = stage.next()
-//            }
-//        )
-//    }
     AnimateContent(
-        shouldShow = stage == Stage.EMAIL_NUMBER,
+        shouldShow = stage.value == Stage.NAME,
+    ) {
+        GetName(
+            firstName = firstName,
+            lastName = lastName,
+            onNameEntered = { first, last ->
+                firstName = first
+                lastName = last
+                stage.value = stage.value.next()
+            }
+        )
+    }
+    AnimateContent(
+        shouldShow = stage.value == Stage.EMAIL_NUMBER,
     ) {
         GetEmailAndPhoneNumber(
+            email = email,
+            phoneNumber = phoneNumber,
+            isEmailDisabled = preInsertedEmail.isNotBlank(),
+            isPhoneNumberDisabled = preInsertedPhoneNumber.isNotBlank(),
             onDetailsEntered = { mail, number ->
                 email = mail
                 phoneNumber = number
-                stage = stage.next()
+                stage.value = stage.value.next()
             },
             validateEmail = { Validators.isEmailValid(it) },
             validatePhoneNumber = { Validators.isPhoneNumberValid(it) }
         )
     }
 
-    AnimateContent(shouldShow = stage == Stage.NAME) {
-        ConfirmationCodeDialog(onConfirm = {}) {
-            stage = stage.next()
+    AnimateContent(shouldShow = stage.value == Stage.CONFIRMATION) {
+        ConfirmationCodeDialog {
+            stage.value = stage.value.next()
         }
     }
-
 }
 
 @Composable
-fun GetName(onNameEntered: (firstName: String, lastName: String) -> Unit) {
-    var firstName by remember { mutableStateOf("") }
-    var firstNameError by remember { mutableStateOf(false) }
-    var lastName by remember { mutableStateOf("") }
-    var lastNameError by remember { mutableStateOf(false) }
+fun GetName(
+    onNameEntered: (firstName: String, lastName: String) -> Unit,
+    firstName: String = "",
+    lastName: String = ""
+) {
+    val firstNameValue = remember { mutableStateOf(firstName) }
+    val firstNameError = remember { mutableStateOf(false) }
+    val lastNameValue = remember { mutableStateOf(lastName) }
+    val lastNameError = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -141,33 +149,35 @@ fun GetName(onNameEntered: (firstName: String, lastName: String) -> Unit) {
             title = stringResource(R.string.first_name),
             minLines = 1,
             maxLines = 1,
-            isError = firstNameError,
+            isError = firstNameError.value,
+            initialText = firstNameValue.value,
             isPassword = false,
             onTextChange = {
-                firstName = it
+                firstNameValue.value = it
             }
         )
         Input(
             title = stringResource(R.string.last_name),
             minLines = 1,
             maxLines = 1,
-            isError = lastNameError,
+            isError = lastNameError.value,
+            initialText = lastNameValue.value,
             isPassword = false,
             onTextChange = {
-                lastName = it
+                lastNameValue.value = it
             }
         )
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
-                lastNameError = false
-                firstNameError = false
+                lastNameError.value = false
+                firstNameError.value = false
 
-                if (firstName.isNotBlank() && lastName.isNotBlank()) {
-                    onNameEntered(firstName, lastName)
+                if (firstNameValue.value.isNotBlank() && lastNameValue.value.isNotBlank()) {
+                    onNameEntered(firstNameValue.value, lastNameValue.value)
                 } else {
-                    firstNameError = firstName.isBlank()
-                    lastNameError = lastName.isBlank()
+                    firstNameError.value = firstNameValue.value.isBlank()
+                    lastNameError.value = lastNameValue.value.isBlank()
                 }
             }, text = stringResource(R.string.next)
         )
@@ -179,11 +189,15 @@ fun GetName(onNameEntered: (firstName: String, lastName: String) -> Unit) {
 fun GetEmailAndPhoneNumber(
     onDetailsEntered: (email: String, number: String) -> Unit,
     validateEmail: (String) -> Boolean,
-    validatePhoneNumber: (String) -> Boolean
+    isEmailDisabled: Boolean = false,
+    isPhoneNumberDisabled: Boolean = false,
+    validatePhoneNumber: (String) -> Boolean,
+    email: String = "",
+    phoneNumber: String = "",
 ) {
-    var number by remember { mutableStateOf("") }
+    var number by remember { mutableStateOf(phoneNumber) }
     var numberError by remember { mutableStateOf(false) }
-    var email by remember { mutableStateOf("") }
+    var emailValue by remember { mutableStateOf(email) }
     var emailError by remember { mutableStateOf(false) }
 
     Column(
@@ -204,21 +218,25 @@ fun GetEmailAndPhoneNumber(
             minLines = 1,
             maxLines = 1,
             isError = emailError,
+            initialText = emailValue,
             isPassword = false,
             onTextChange = {
-                email = it
+                emailValue = it
                 emailError = false
-            }
+            },
+            isDisabled = isEmailDisabled
         )
         Input(
             title = stringResource(R.string.phone_number),
             minLines = 1,
             maxLines = 1,
             isError = numberError,
+            initialText = number,
             isPassword = false,
             onTextChange = {
                 number = it
-            }
+            },
+            isDisabled = isPhoneNumberDisabled
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -226,74 +244,17 @@ fun GetEmailAndPhoneNumber(
             onClick = {
                 emailError = false
                 numberError = false
-                if (!validateEmail(email)) {
+                if (!validateEmail(emailValue)) {
                     emailError = true
                 }
                 if (!validatePhoneNumber(number)) {
                     numberError = true
                 }
-                if (!emailError && !numberError && email.isNotBlank() && number.isNotBlank()) {
-                    onDetailsEntered(email, number)
+                if (!emailError && !numberError && emailValue.isNotBlank() && number.isNotBlank()) {
+                    onDetailsEntered(emailValue, number)
                 } else {
-                    emailError = email.isBlank()
+                    emailError = emailValue.isBlank()
                     numberError = number.isBlank()
-                }
-            }, text = stringResource(R.string.next)
-        )
-    }
-}
-
-@Composable
-fun GetPassword(onPasswordEntered: (password: String, confirmPassword: String) -> Unit) {
-    var password by remember { mutableStateOf("") }
-    var passwordError by remember { mutableStateOf(false) }
-    var confirmPassword by remember { mutableStateOf("") }
-    var confirmPasswordError by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .background(MaterialTheme.colors.background),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
-    ) {
-        Text(
-            text = stringResource(R.string.what_is_your_name),
-            style = MaterialTheme.typography.h5,
-            color = MaterialTheme.colors.onBackground
-        )
-        Input(
-            title = stringResource(R.string.password),
-            minLines = 1,
-            maxLines = 1,
-            isError = passwordError,
-            isPassword = false,
-            onTextChange = {
-                password = it
-            }
-        )
-        Input(
-            title = stringResource(R.string.confirm_password),
-            minLines = 1,
-            maxLines = 1,
-            isError = confirmPasswordError,
-            isPassword = false,
-            onTextChange = {
-                confirmPassword = it
-            }
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        ActionButton(
-            onClick = {
-                passwordError = false
-                confirmPasswordError = false
-
-                if (password.isNotBlank() && confirmPassword.isNotBlank()) {
-                    onPasswordEntered(password, confirmPassword)
-                } else {
-                    passwordError = password.isBlank()
-                    confirmPasswordError = confirmPassword.isBlank()
                 }
             }, text = stringResource(R.string.next)
         )
@@ -304,28 +265,28 @@ fun GetPassword(onPasswordEntered: (password: String, confirmPassword: String) -
 @Composable
 fun ConfirmationCodeDialog(
     onConfirm: (code: String) -> Unit,
-    onDismiss: () -> Unit
 ) {
-    val focusManager = LocalFocusManager.current
-    val code = remember { mutableStateListOf("", "", "", "", "", "") }
-    val focusRequesters = remember { Array(6) { FocusRequester() } }
+    val codeInputs = 6
+    val code = remember { mutableStateOf(Array(codeInputs) { "" }) }
+    val focusRequesters = remember { Array(codeInputs) { FocusRequester() } }
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
     val spaceBetweenInputs = 4.dp
-    val inputSize = (screenWidth - spaceBetweenInputs * 12) / 6
+    val inputSize = (screenWidth - spaceBetweenInputs * (codeInputs * 2)) / codeInputs
     val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(cursorColor = Color.Transparent)
 
     Column {
         Row(horizontalArrangement = Arrangement.Center) {
-            for (i in 0 until 6) {
+            for (i in 0 until codeInputs) {
                 OutlinedTextField(
-                    value = code[i],
+                    value = code.value[i],
                     onValueChange = { newValue ->
-                        if (code[i].isNotEmpty() && newValue.length > 1) {
-                            code[i] = newValue.replaceFirst(code[i], "").lastOrNull().toString()
+                        if (code.value[i].isNotEmpty() && newValue.length > 1) {
+                            code.value[i] =
+                                newValue.replaceFirst(code.value[i], "").lastOrNull().toString()
                         } else {
-                            code[i] = newValue
+                            code.value[i] = newValue
                         }
-                        if (code[i].length == 1 && i < 5) {
+                        if (code.value[i].length == 1 && i < codeInputs - 1) {
                             focusRequesters[i + 1].requestFocus()
                         }
                     },
@@ -336,11 +297,16 @@ fun ConfirmationCodeDialog(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(
                         keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        imeAction = if (i < codeInputs - 1) ImeAction.Next else ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(onNext = {
                         focusRequesters[i + 1].requestFocus()
-                    }),
+                    },
+                        onDone = {
+                            val fullCode = code.value.joinToString(separator = "")
+                            onConfirm(fullCode)
+                        }
+                    ),
                     textStyle = LocalTextStyle.current.copy(
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center
@@ -351,7 +317,7 @@ fun ConfirmationCodeDialog(
         }
         ActionButton(
             onClick = {
-                val fullCode = code.joinToString(separator = "")
+                val fullCode = code.value.joinToString(separator = "")
                 onConfirm(fullCode)
             },
             modifier = Modifier.padding(vertical = 16.dp),

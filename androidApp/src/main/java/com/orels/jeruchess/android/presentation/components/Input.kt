@@ -2,10 +2,7 @@ package com.orels.jeruchess.android.presentation.components
 
 
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -17,6 +14,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -35,9 +33,11 @@ fun Input(
     isError: Boolean = false,
     isPassword: Boolean = false,
     shouldFocus: Boolean = false,
+    keyboardType: KeyboardType = KeyboardType.Text,
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = { },
-    onTextChange: (String) -> Unit = {}
+    onTextChange: (String) -> Unit = {},
+    isDisabled: Boolean = false
 ) {
     val value = remember { mutableStateOf(initialText) }
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
@@ -50,7 +50,12 @@ fun Input(
         if (maxLines == 1) inputModifier else inputModifier.height((lineHeight * minLines).dp)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(title)
+        Text(
+            text = title,
+            modifier = Modifier.padding(bottom = 4.dp),
+            style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Normal),
+            color = MaterialTheme.colors.onBackground.copy(alpha = 0.9f)
+        )
         Box(modifier = Modifier.zIndex(1f)) {
             OutlinedTextField(
                 modifier = inputModifier
@@ -70,7 +75,7 @@ fun Input(
                 singleLine = maxLines == 1,
                 visualTransformation = if (isPassword && !passwordVisible.value) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions(
-                    keyboardType = KeyboardType.Text
+                    keyboardType = keyboardType
                 ),
                 trailingIcon = {
                     if (isPassword) {
@@ -82,7 +87,8 @@ fun Input(
                     }
                 },
                 leadingIcon = leadingIcon,
-                isError = isError
+                isError = isError,
+                enabled = isDisabled.not()
             )
         }
     }

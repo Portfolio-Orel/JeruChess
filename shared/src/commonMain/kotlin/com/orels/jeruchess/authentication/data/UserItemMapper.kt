@@ -14,5 +14,5 @@ fun User.toUserEntity(): UserEntity = UserEntity(
     firstName = firstName,
     lastName = lastName,
     email = email,
-    phone = phone
+    phone = phoneNumber
 )

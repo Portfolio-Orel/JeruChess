@@ -19,7 +19,7 @@
     <string name="error_limit_exceeded_operation">You tried too many times.. Try again later</string>
     <string name="insert_email_code">Insert the code you received in the mail</string>
     <string name="confirmation_code">Confirmation code</string>
-    <string name="what_is_your_name">What&quot;s your name?</string>
+    <string name="what_is_your_name">What\'s your name?</string>
     <string name="first_name">First name</string>
     <string name="last_name">Last name</string>
     <string name="finish">Finish</string>
@@ -39,6 +39,6 @@
     <string name="what_is_your_email">What is your email?</string>
     <string name="next">Next</string>
     <string name="location_icon">Location icon</string>
-    <string name="phone_number">phone number</string>
+    <string name="phone_number">Phone number</string>
     <string name="confirm">Confirm</string>
 </resources>

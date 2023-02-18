@@ -14,10 +14,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.orels.jeruchess.android.core.presentation.Routes
+import com.orels.jeruchess.android.core.presentation.RoutesArguments.PRE_INSERTED_EMAIL
+import com.orels.jeruchess.android.core.presentation.RoutesArguments.PRE_INSERTED_PHONE_NUMBER
 import com.orels.jeruchess.android.presentation.auth.forgot_password.ForgotPasswordScreen
 import com.orels.jeruchess.android.presentation.auth.login.LoginScreen
-import com.orels.jeruchess.android.presentation.auth.login.LoginViewModel
 import com.orels.jeruchess.android.presentation.auth.register.RegisterScreen
 import com.orels.jeruchess.android.presentation.main.AndroidMainViewModel
 import com.orels.jeruchess.android.presentation.main.MainScreen
@@ -42,12 +44,8 @@ class MainActivity : ComponentActivity() {
                         composable(
                             route = Routes.LOGIN,
                         ) {
-                            val viewModel = hiltViewModel<LoginViewModel>()
-                            val state by viewModel.state.collectAsState()
                             LoginScreen(
                                 navController = navController,
-                                state = state,
-                                viewModel = viewModel
                             )
                         }
                         composable(
@@ -56,9 +54,29 @@ class MainActivity : ComponentActivity() {
                             ForgotPasswordScreen(navController = navController)
                         }
                         composable(
-                            route = Routes.REGISTER,
+                            route = Routes.REGISTER + "/{$PRE_INSERTED_PHONE_NUMBER}/{$PRE_INSERTED_EMAIL}",
+                            arguments = listOf(
+                                navArgument(PRE_INSERTED_PHONE_NUMBER) {
+                                    defaultValue = ""
+                                },
+                                navArgument(PRE_INSERTED_EMAIL) {
+                                    defaultValue = ""
+                                },
+                            )
                         ) {
-                            RegisterScreen(navController = navController)
+                            val preInsertedPhoneNumber =
+                                it.arguments?.getString(
+                                    PRE_INSERTED_PHONE_NUMBER
+                                ) ?: ""
+                            val preInsertedEmail =
+                                it.arguments?.getString(
+                                    PRE_INSERTED_EMAIL
+                                ) ?: ""
+                            RegisterScreen(
+                                navController = navController,
+                                preInsertedPhoneNumber = preInsertedPhoneNumber,
+                                preInsertedEmail = preInsertedEmail
+                            )
                         }
                         composable(
                             route = Routes.MAIN,
