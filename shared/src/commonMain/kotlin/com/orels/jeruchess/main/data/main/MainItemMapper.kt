@@ -1,4 +1,4 @@
-package com.orels.jeruchess.main.data
+package com.orels.jeruchess.main.data.main
 
 import com.orels.jeruchess.main.domain.model.ClubData
 import database.ClubDataEntity

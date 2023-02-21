@@ -1,6 +1,6 @@
-package com.orels.jeruchess.main.data
+package com.orels.jeruchess.main.data.main
 
-import com.orels.jeruchess.main.domain.data.MainClient
+import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.model.ClubData
 
 class KtorMainClient : MainClient {

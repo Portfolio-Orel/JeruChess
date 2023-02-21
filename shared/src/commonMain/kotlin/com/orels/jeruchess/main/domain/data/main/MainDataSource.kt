@@ -1,4 +1,4 @@
-package com.orels.jeruchess.main.domain.data
+package com.orels.jeruchess.main.domain.data.main
 
 import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.model.ClubData

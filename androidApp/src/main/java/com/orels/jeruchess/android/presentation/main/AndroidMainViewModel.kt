@@ -5,8 +5,8 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.orels.jeruchess.main.domain.data.MainClient
-import com.orels.jeruchess.main.domain.data.MainDataSource
+import com.orels.jeruchess.main.domain.data.main.MainClient
+import com.orels.jeruchess.main.domain.data.main.MainDataSource
 import com.orels.jeruchess.main.presentation.MainEvent
 import com.orels.jeruchess.main.presentation.MainViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,7 +1,7 @@
 package com.orels.jeruchess.authentication.domain.dataSource
 
-import com.orels.jeruchess.authentication.domain.model.User
 import com.orels.jeruchess.core.util.CommonFlow
+import com.orels.jeruchess.main.domain.model.User
 
 
 interface AuthDataSource {

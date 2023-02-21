@@ -2,7 +2,7 @@ package com.orels.jeruchess.android.domain.interactors
 
 import android.app.Activity
 import com.orels.jeruchess.android.domain.model.ConfigFile
-import com.orels.jeruchess.authentication.domain.model.User
+import com.orels.jeruchess.main.domain.model.User
 
 interface AuthInteractor {
     fun initialize(configFile: ConfigFile)

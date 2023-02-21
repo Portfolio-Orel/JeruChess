@@ -2,14 +2,36 @@ CREATE TABLE  userEntity(
     id TEXT NOT NULL PRIMARY KEY,
     firstName TEXT NOT NULL,
     lastName TEXT NOT NULL,
+    gender TEXT NOT NULL,
     email TEXT NOT NULL,
-    phone TEXT NOT NULL
+    phoneNumber TEXT NOT NULL,
+    playerNumber TEXT NOT NULL,
+    dateOfBirth INTEGER NOT NULL
 );
 
-CREATE TABLE chessUserData(
+CREATE TABLE eventEntity(
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL,
+    date INTEGER NOT NULL,
+    price INTEGER NOT NULL,
+    currency TEXT NOT NULL,
+    minAge INTEGER NOT NULL,
+    minRating INTEGER NOT NULL,
+    maxRating INTEGER NOT NULL
+);
+
+CREATE TABLE chessUserDataEntity(
     userId TEXT NOT NULL PRIMARY KEY,
-    rating INTEGER NOT NULL DEFAULT 0,
-    FOREIGN KEY (userId) REFERENCES userEntity(id) ON DELETE CASCADE
+    rating INTEGER NOT NULL,
+    FOREIGN KEY(userId) REFERENCES userEntity(id)
+);
+
+CREATE TABLE eventParticipantEntity(
+    eventId TEXT NOT NULL,
+    userId TEXT NOT NULL,
+    FOREIGN KEY(eventId) REFERENCES eventEntity(id),
+    FOREIGN KEY(userId) REFERENCES userEntity(id)
 );
 
 CREATE TABLE clubDataEntity(
@@ -21,34 +43,6 @@ CREATE TABLE clubDataEntity(
     instagram TEXT,
     twitter TEXT
 );
-
-insertUser:
-INSERT OR REPLACE
- INTO userEntity (
-    id,
-    firstName,
-    lastName,
-    email,
-    phone
-) VALUES (?, ?, ?, ?, ?);
-
--- ChessUserData --
-insertChessUserData:
-INSERT OR REPLACE
- INTO chessUserData (
-    userId,
-    rating
-) VALUES (?, ?);
--- ChessUserData --
-
--- User --
-getUser:
-SELECT *
-FROM userEntity;
-
-deleteUser:
-DELETE FROM userEntity;
--- User --
 
 -- Club --
 getClub:
@@ -67,6 +61,28 @@ INSERT OR REPLACE
     twitter
 ) VALUES (?, ?, ?, ?, ?, ?, ?);
 
+-- Users --
+getUser:
+SELECT *
+FROM userEntity;
+
+insertUser:
+INSERT OR REPLACE
+ INTO userEntity (
+    id,
+    firstName,
+    lastName,
+    gender,
+    email,
+    phoneNumber,
+    playerNumber,
+    dateOfBirth
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteUser:
+DELETE FROM userEntity;
+
+-- Club --
 deleteClub:
 DELETE FROM clubDataEntity
 WHERE address = ?;
@@ -81,5 +97,86 @@ SET address = ?,
     instagram = ?,
     twitter = ?;
 -- Club --
+
+-- Events --
+getEvents:
+SELECT *
+FROM eventEntity;
+
+insertEvent:
+INSERT OR REPLACE
+ INTO eventEntity (
+    id,
+    name,
+    description,
+    date,
+    price,
+    currency,
+    minAge,
+    minRating,
+    maxRating
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteEvent:
+DELETE FROM eventEntity
+WHERE id = ?;
+
+updateEvent:
+UPDATE eventEntity
+SET name = ?,
+    description = ?,
+    date = ?,
+    price = ?,
+    currency = ?,
+    minAge = ?,
+    minRating = ?,
+    maxRating = ?;
+-- Events --
+
+-- EventParticipants --
+getEventParticipants:
+SELECT *
+FROM eventParticipantEntity
+WHERE eventId = ?;
+
+insertEventParticipant:
+INSERT OR REPLACE
+ INTO eventParticipantEntity (
+    eventId,
+    userId
+) VALUES (?, ?);
+
+deleteEventParticipant:
+DELETE FROM eventParticipantEntity
+WHERE eventId = ? AND userId = ?;
+
+updateEventParticipant:
+UPDATE eventParticipantEntity
+SET eventId = ?,
+    userId = ?;
+-- EventParticipants --
+
+-- ChessUserData --
+getChessUserData:
+SELECT *
+FROM chessUserDataEntity;
+
+insertChessUserData:
+INSERT OR REPLACE
+ INTO chessUserDataEntity (
+    userId,
+    rating
+) VALUES (?, ?);
+
+deleteChessUserData:
+DELETE FROM chessUserDataEntity
+WHERE userId = ?;
+
+updateChessUserData:
+UPDATE chessUserDataEntity
+SET rating = ?
+WHERE userId = ?;
+-- ChessUserData --
+
 
 

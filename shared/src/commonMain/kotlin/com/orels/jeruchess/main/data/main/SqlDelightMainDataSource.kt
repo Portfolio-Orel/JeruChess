@@ -1,9 +1,9 @@
-package com.orels.jeruchess.main.data
+package com.orels.jeruchess.main.data.main
 
 import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.core.util.toCommonFlow
 import com.orels.jeruchess.database.JeruChessDatabase
-import com.orels.jeruchess.main.domain.data.MainDataSource
+import com.orels.jeruchess.main.domain.data.main.MainDataSource
 import com.orels.jeruchess.main.domain.model.ClubData
 import com.squareup.sqldelight.runtime.coroutines.asFlow
 import com.squareup.sqldelight.runtime.coroutines.mapToOneOrNull

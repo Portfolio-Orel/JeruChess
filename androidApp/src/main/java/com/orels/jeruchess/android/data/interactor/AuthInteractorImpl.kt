@@ -10,21 +10,18 @@ import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
 import com.amplifyframework.auth.options.AuthSignUpOptions
+import com.amplifyframework.auth.result.step.AuthSignUpStep
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.AmplifyConfiguration
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthInvalidUserException
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
-import com.orels.jeruchess.authentication.domain.exceptions.InvalidUserException
-import com.orels.jeruchess.authentication.domain.model.User
+import com.orels.jeruchess.main.domain.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class AuthInteractorImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : AuthInteractor {
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
     companion object {
         var isConfigured: Boolean = false
@@ -63,6 +60,9 @@ class AuthInteractorImpl @Inject constructor(
 
             Amplify.Auth.signUp(phoneNumber, "38qj2!cmiCkK", options,
                 { result ->
+                    if(result.nextStep.signUpStep == AuthSignUpStep.CONFIRM_SIGN_UP_STEP) {
+                        Log.i("AuthDemo", "Sign up complete")
+                    }
                     Log.i("AuthDemo", "Sign up successful, confirmation code sent")
                 },
                 { error ->
@@ -82,6 +82,25 @@ class AuthInteractorImpl @Inject constructor(
         }
     }
 
+    override suspend fun register(email: String, password: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun logout() {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun isUserLoggedIn(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getCurrentUserEmail(): String {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getUser(): User {
+        TODO("Not yet implemented")
+    }
 
 
     override suspend fun loginWithGoogle(activity: Activity) {
@@ -104,37 +123,5 @@ class AuthInteractorImpl @Inject constructor(
         } catch (error: AmplifyException) {
             Log.e("MyAmplifyApp", "Could not initialize Amplify", error);
         }
-    }
-
-    override suspend fun register(email: String, password: String) {
-        val result = auth.createUserWithEmailAndPassword(email, password)
-        if (!result.isSuccessful) {
-            when (result.exception) {
-                is FirebaseAuthInvalidUserException -> throw InvalidUserException
-                is Exception -> throw result.exception!!
-            }
-        }
-    }
-
-    override suspend fun logout() {
-        auth.signOut()
-    }
-
-    override suspend fun isUserLoggedIn(): Boolean {
-        return auth.currentUser != null
-    }
-
-    override suspend fun getCurrentUserEmail(): String {
-        return auth.currentUser?.email ?: ""
-    }
-
-    override suspend fun getUser(): User {
-        return User(
-            email = auth.currentUser?.email ?: "",
-            id = auth.currentUser?.uid ?: "",
-            firstName = auth.currentUser?.displayName ?: "",
-            lastName = "",
-            isGuest = auth.currentUser?.uid == ""
-        )
     }
 }

@@ -2,8 +2,8 @@ package com.orels.jeruchess.main.presentation
 
 import com.orels.jeruchess.core.util.CommonStateFlow
 import com.orels.jeruchess.core.util.toCommonStateFlow
-import com.orels.jeruchess.main.domain.data.MainClient
-import com.orels.jeruchess.main.domain.data.MainDataSource
+import com.orels.jeruchess.main.domain.data.main.MainClient
+import com.orels.jeruchess.main.domain.data.main.MainDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
