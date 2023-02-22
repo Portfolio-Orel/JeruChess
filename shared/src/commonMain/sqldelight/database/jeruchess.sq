@@ -24,6 +24,7 @@ CREATE TABLE eventEntity(
 CREATE TABLE chessUserDataEntity(
     userId TEXT NOT NULL PRIMARY KEY,
     rating INTEGER NOT NULL,
+    isProfileActive INTEGER NOT NULL,
     FOREIGN KEY(userId) REFERENCES userEntity(id)
 );
 
@@ -165,8 +166,9 @@ insertChessUserData:
 INSERT OR REPLACE
  INTO chessUserDataEntity (
     userId,
-    rating
-) VALUES (?, ?);
+    rating,
+    isProfileActive
+) VALUES (?, ?, ?);
 
 deleteChessUserData:
 DELETE FROM chessUserDataEntity
@@ -174,7 +176,8 @@ WHERE userId = ?;
 
 updateChessUserData:
 UPDATE chessUserDataEntity
-SET rating = ?
+SET rating = ?,
+    isProfileActive = ?
 WHERE userId = ?;
 -- ChessUserData --
 
