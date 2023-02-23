@@ -56,6 +56,7 @@ dependencies {
     implementation(Deps.firebaseBom)
     implementation(Deps.firebaseFirestore)
     implementation(Deps.firebaseAuth)
+    implementation(Deps.androidPlayIntegrity)
 
     implementation(Deps.hiltAndroid)
     kapt(Deps.hiltAndroidCompiler)

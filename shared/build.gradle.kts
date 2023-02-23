@@ -32,8 +32,6 @@ kotlin {
                 implementation(Deps.sqlDelightRuntime)
                 implementation(Deps.sqlDelightCoroutinesExtensions)
                 implementation(Deps.kotlinDateTime)
-                implementation(Deps.gitLiveAuth)
-                implementation(Deps.gitLiveFirestore)
                 implementation(kotlin("script-runtime"))
             }
         }

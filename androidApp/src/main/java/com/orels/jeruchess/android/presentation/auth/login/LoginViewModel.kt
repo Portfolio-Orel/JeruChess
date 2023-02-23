@@ -24,14 +24,11 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun loginWithPhone(phoneNumber: String) {
+    private fun loginWithPhone(phoneNumber: String, activity: Activity) {
         state = state.copy(isLoadingLogin = true)
         viewModelScope.launch {
-            if (phoneNumber.length < 8) {
-                authInteractor.register(phoneNumber, "")
-            } else {
-                authInteractor.loginWithPhone(phoneNumber)
-            }
+            authInteractor.loginWithPhone(phoneNumber, activity)
+
             state = state.copy(isLoadingLogin = false)
         }
     }
@@ -45,7 +42,7 @@ class LoginViewModel @Inject constructor(
     fun onEvent(event: LoginEvent) {
         when (event) {
             is LoginEvent.LoginWithGoogle -> loginWithGoogle(event.activity)
-            is LoginEvent.Login -> loginWithPhone(event.phoneNumber)
+            is LoginEvent.Login -> loginWithPhone(event.phoneNumber, event.activity)
             is LoginEvent.Register -> state =
                 state.copy(authState = AuthState.REGISTRATION_REQUIRED)
             is LoginEvent.Logout -> logout()

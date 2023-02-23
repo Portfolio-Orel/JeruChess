@@ -3,19 +3,17 @@ package com.orels.jeruchess.android.data.interactor
 import android.app.Activity
 import android.content.Context
 import android.telephony.PhoneNumberUtils
-import android.util.Log
-import com.amplifyframework.AmplifyException
-import com.amplifyframework.auth.AuthProvider
-import com.amplifyframework.auth.AuthUserAttributeKey
-import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
-import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
 import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
-import com.amplifyframework.auth.options.AuthConfirmSignInOptions
+import com.amplifyframework.auth.cognito.options.AuthFlowType
 import com.amplifyframework.auth.options.AuthSignInOptions
-import com.amplifyframework.core.Amplify
-import com.amplifyframework.core.AmplifyConfiguration
+import com.amplifyframework.kotlin.core.Amplify
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthProvider
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
-import com.orels.jeruchess.android.domain.model.ConfigFile
+import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.data.users.UsersClient
 import com.orels.jeruchess.main.domain.data.users.UsersDataSource
 import com.orels.jeruchess.main.domain.model.User
@@ -28,116 +26,57 @@ class AuthInteractorImpl @Inject constructor(
     private val usersClient: UsersClient,
 ) : AuthInteractor {
 
-    companion object {
-        var isConfigured: Boolean = false
+    val auth = Firebase.auth
+
+    override suspend fun loginWithGoogle(activity: Activity) {
+
     }
 
-    override fun initialize(configFile: ConfigFile) {
-        if (isConfigured) return
-        Amplify.addPlugin(AWSCognitoAuthPlugin())
-        Amplify.configure(
-            AmplifyConfiguration.fromConfigFile(context, configFile.fileResId),
-            context
-        )
-        isConfigured = true
-    }
-
-    override suspend fun login(email: String, password: String) {
-
-//        val result = auth.signInWithEmailAndPassword(email, password)
-//        if (!result.isSuccessful) {
-//            when (result.exception) {
-//                is FirebaseAuthInvalidUserException -> throw InvalidUserException
-//                is Exception -> throw result.exception!!
-//            }
-//        }
-    }
-
-    override suspend fun loginWithPhone(phoneNumber: String) {
+    override suspend fun loginWithPhone(phoneNumber: String, activity: Activity) {
+        val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
+        val signInOptions: AuthSignInOptions = AWSCognitoAuthSignInOptions.builder()
+            .authFlowType(AuthFlowType.CUSTOM_AUTH_WITH_SRP)
+            .metadata(mapOf("phoneNumber" to formattedPhoneNumber))
+            .build()
         try {
-            val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
-            val options: AuthSignInOptions = AWSCognitoAuthSignInOptions.builder()
-                .metadata(
-                    mapOf(
-                        AuthUserAttributeKey.phoneNumberVerified().toString() to formattedPhoneNumber
-                    )
-                )
-                .metadata(
-                    mapOf(
-                        AuthUserAttributeKey.phoneNumber().toString() to formattedPhoneNumber
-                    )
-                )
-                .build()
-//
-//            Amplify.Auth.signIn(null, null, options, { result ->
-//                Log.i("AuthQuickstart", "")
-//            }, { error ->
-//                Log.e("AuthQuickstart", error.toString())
-//            })
-
-
-            Amplify.Auth.signIn(formattedPhoneNumber, null, options,
-                {
-                    Log.i("AuthDemo", "Confirmation code resent")
-                },
-                { e ->
-                    Log.e("AuthDemo", "Confirmation code resend failed", e)
-                }
+            Amplify.Auth.signIn(
+                formattedPhoneNumber,
+                null,
+                signInOptions,
             )
-//            Amplify.Auth.signUp(formattedPhoneNumber, PasswordGenerator.generateStrongPassword(), options,
-//                { result ->
-//                    if (result.nextStep.signUpStep == AuthSignUpStep.CONFIRM_SIGN_UP_STEP) {
-//                        Log.i("AuthDemo", "Sign up complete")
-////                        result.userId
-//                    }
-//                    Log.i("AuthDemo", "Sign up successful, confirmation code sent")
-//                },
-//                { error ->
-//                    Log.e("AuthDemo", "Sign up failed", error)
-//                    Amplify.Auth.resendSignUpCode(phoneNumber,
-//                        {
-//                            Log.i("AuthDemo", "Confirmation code resent")
-//                        },
-//                        { e ->
-//                            Log.e("AuthDemo", "Confirmation code resend failed", e)
-//                        }
-//                    )
-//                }
-//            )
-        } catch (error: AmplifyException) {
-            Log.e("MyAmplifyApp", "Could not initialize Amplify", error);
+            println("success")
+        } catch (e: Exception) {
+            println(e)
         }
+//        if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+
+//            == ConnectionResult.SUCCESS
+//        ) {
+//            println() // AIzaSyBMfhHxb58xjUi2acv-dzXyLecpuAir898
+//        } else {
+//            println()
+//        }
+//        FirebaseAuth.getInstance().setLanguageCode("en")
+//        val options = PhoneAuthOptions.newBuilder(auth)
+//            .setPhoneNumber(formattedPhoneNumber)
+//            .setTimeout(60L, TimeUnit.SECONDS)
+//            .setActivity(activity)
+//            .requireSmsValidation(true)
+//            .setCallbacks(phoneAuthCallback)
+//            .build()
+//        auth.setLanguageCode("en")
+//        PhoneAuthProvider.verifyPhoneNumber(options)
     }
 
-    override suspend fun register(email: String, password: String) {
-
-        val confirmOptions = AuthConfirmSignInOptions.defaults()
-
-        Amplify.Auth.confirmSignIn(email, confirmOptions,
-            {
-                Log.i("AuthDemo", "Sign in succeeded")
-            },
-            { e ->
-                Log.e("AuthDemo", "Sign in failed", e)
-            }
-        )
+    override suspend fun register(user: User) {
+        TODO("Not yet implemented")
     }
 
     override suspend fun logout() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun isUserLoggedIn(): Boolean {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun isUserRegistered(email: String?, phoneNumber: String?): Boolean {
-//        usersClient.getUser()
-        return false
-    }
-
-
-    override suspend fun getCurrentUserEmail(): String {
         TODO("Not yet implemented")
     }
 
@@ -145,26 +84,19 @@ class AuthInteractorImpl @Inject constructor(
         TODO("Not yet implemented")
     }
 
-
-    override suspend fun loginWithGoogle(activity: Activity) {
-        try {
-            Amplify.Auth.signInWithSocialWebUI(
-                AuthProvider.google(),
-                activity,
-                { Log.i("AuthQuickstart", "Result: $it") },
-                {
-                    when (it) {
-                        is SignedInException -> Log.i("AuthQuickstart", "Signed in already")
-                        else -> Log.e("AuthQuickstart", "Sign in failed", it)
-                    }
-                }
-            )
-            Log.i(
-                "MyAmplifyApp",
-                "Initialized Amplify"
-            )
-        } catch (error: AmplifyException) {
-            Log.e("MyAmplifyApp", "Could not initialize Amplify", error);
-        }
+    override suspend fun getUserFlow(): CommonFlow<User> {
+        TODO("Not yet implemented")
     }
+
+    private val phoneAuthCallback =
+        object : PhoneAuthProvider.OnVerificationStateChangedCallbacks() {
+            override fun onVerificationCompleted(phoneAuthCredential: PhoneAuthCredential) {
+                println("onVerificationCompleted")
+            }
+
+            override fun onVerificationFailed(exception: FirebaseException) {
+                println("onVerificationFailed")
+            }
+
+        }
 }

@@ -10,7 +10,7 @@ buildscript {
         classpath(Deps.sqlDelightGradlePlugin)
         classpath(Deps.hiltGradlePlugin)
         classpath(Deps.googleServices)
-        classpath("com.android.tools.build:gradle:4.0.2")
+        classpath("com.android.tools.build:gradle:7.4.1")
     }
 }
 

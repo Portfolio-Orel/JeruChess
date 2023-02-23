@@ -139,8 +139,9 @@ fun LoginScreen(
                             viewModel.onEvent(
                                 LoginEvent.Login(
                                     phoneNumber = phoneNumber.value,
+                                    activity = it,
                                 ),
-                                )
+                            )
                         }
                     },
                     shape = MaterialTheme.shapes.medium,
