@@ -6,4 +6,7 @@ import database.ChessUserDataEntity
 fun ChessUserDataEntity.toChessUserData() = ChessUserData(
     userId = userId,
     rating = rating,
+    isProfileActive = isProfileActive.toBoolean(),
 )
+
+fun Long.toBoolean() = this != 0L

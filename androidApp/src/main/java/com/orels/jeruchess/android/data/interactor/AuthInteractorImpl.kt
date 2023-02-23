@@ -9,18 +9,23 @@ import com.amplifyframework.auth.AuthProvider
 import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
-import com.amplifyframework.auth.options.AuthSignUpOptions
-import com.amplifyframework.auth.result.step.AuthSignUpStep
+import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
+import com.amplifyframework.auth.options.AuthConfirmSignInOptions
+import com.amplifyframework.auth.options.AuthSignInOptions
 import com.amplifyframework.core.Amplify
 import com.amplifyframework.core.AmplifyConfiguration
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
+import com.orels.jeruchess.main.domain.data.users.UsersClient
+import com.orels.jeruchess.main.domain.data.users.UsersDataSource
 import com.orels.jeruchess.main.domain.model.User
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 
 class AuthInteractorImpl @Inject constructor(
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val usersDataSource: UsersDataSource,
+    private val usersClient: UsersClient,
 ) : AuthInteractor {
 
     companion object {
@@ -50,40 +55,72 @@ class AuthInteractorImpl @Inject constructor(
 
     override suspend fun loginWithPhone(phoneNumber: String) {
         try {
-            val options = AuthSignUpOptions.builder()
-                .userAttribute(
-                    AuthUserAttributeKey.phoneNumber(),
-                    PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
-                )
-                .userAttribute(AuthUserAttributeKey.email(), "orelsmail@gmail.com")
-                .build()
-
-            Amplify.Auth.signUp(phoneNumber, "38qj2!cmiCkK", options,
-                { result ->
-                    if(result.nextStep.signUpStep == AuthSignUpStep.CONFIRM_SIGN_UP_STEP) {
-                        Log.i("AuthDemo", "Sign up complete")
-                    }
-                    Log.i("AuthDemo", "Sign up successful, confirmation code sent")
-                },
-                { error ->
-                    Log.e("AuthDemo", "Sign up failed", error)
-                    Amplify.Auth.resendSignUpCode(phoneNumber,
-                        { result ->
-                            Log.i("AuthDemo", "Confirmation code resent")
-                        },
-                        { error ->
-                            Log.e("AuthDemo", "Confirmation code resend failed", error)
-                        }
+            val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
+            val options: AuthSignInOptions = AWSCognitoAuthSignInOptions.builder()
+                .metadata(
+                    mapOf(
+                        AuthUserAttributeKey.phoneNumberVerified().toString() to formattedPhoneNumber
                     )
+                )
+                .metadata(
+                    mapOf(
+                        AuthUserAttributeKey.phoneNumber().toString() to formattedPhoneNumber
+                    )
+                )
+                .build()
+//
+//            Amplify.Auth.signIn(null, null, options, { result ->
+//                Log.i("AuthQuickstart", "")
+//            }, { error ->
+//                Log.e("AuthQuickstart", error.toString())
+//            })
+
+
+            Amplify.Auth.signIn(formattedPhoneNumber, null, options,
+                {
+                    Log.i("AuthDemo", "Confirmation code resent")
+                },
+                { e ->
+                    Log.e("AuthDemo", "Confirmation code resend failed", e)
                 }
             )
+//            Amplify.Auth.signUp(formattedPhoneNumber, PasswordGenerator.generateStrongPassword(), options,
+//                { result ->
+//                    if (result.nextStep.signUpStep == AuthSignUpStep.CONFIRM_SIGN_UP_STEP) {
+//                        Log.i("AuthDemo", "Sign up complete")
+////                        result.userId
+//                    }
+//                    Log.i("AuthDemo", "Sign up successful, confirmation code sent")
+//                },
+//                { error ->
+//                    Log.e("AuthDemo", "Sign up failed", error)
+//                    Amplify.Auth.resendSignUpCode(phoneNumber,
+//                        {
+//                            Log.i("AuthDemo", "Confirmation code resent")
+//                        },
+//                        { e ->
+//                            Log.e("AuthDemo", "Confirmation code resend failed", e)
+//                        }
+//                    )
+//                }
+//            )
         } catch (error: AmplifyException) {
             Log.e("MyAmplifyApp", "Could not initialize Amplify", error);
         }
     }
 
     override suspend fun register(email: String, password: String) {
-        TODO("Not yet implemented")
+
+        val confirmOptions = AuthConfirmSignInOptions.defaults()
+
+        Amplify.Auth.confirmSignIn(email, confirmOptions,
+            {
+                Log.i("AuthDemo", "Sign in succeeded")
+            },
+            { e ->
+                Log.e("AuthDemo", "Sign in failed", e)
+            }
+        )
     }
 
     override suspend fun logout() {
@@ -93,6 +130,12 @@ class AuthInteractorImpl @Inject constructor(
     override suspend fun isUserLoggedIn(): Boolean {
         TODO("Not yet implemented")
     }
+
+    override suspend fun isUserRegistered(email: String?, phoneNumber: String?): Boolean {
+//        usersClient.getUser()
+        return false
+    }
+
 
     override suspend fun getCurrentUserEmail(): String {
         TODO("Not yet implemented")

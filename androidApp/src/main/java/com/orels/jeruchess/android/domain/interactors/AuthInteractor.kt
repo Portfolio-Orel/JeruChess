@@ -12,6 +12,7 @@ interface AuthInteractor {
     suspend fun register(email: String, password: String)
     suspend fun logout()
     suspend fun isUserLoggedIn(): Boolean
+    suspend fun isUserRegistered(email: String?, phoneNumber: String?): Boolean
     suspend fun getCurrentUserEmail(): String
     suspend fun getUser(): User
 }

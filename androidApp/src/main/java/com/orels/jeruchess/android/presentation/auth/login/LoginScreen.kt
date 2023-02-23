@@ -140,7 +140,6 @@ fun LoginScreen(
                                 LoginEvent.Login(
                                     phoneNumber = phoneNumber.value,
                                 ),
-
                                 )
                         }
                     },

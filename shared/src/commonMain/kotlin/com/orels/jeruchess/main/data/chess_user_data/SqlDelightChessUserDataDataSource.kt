@@ -18,12 +18,14 @@ class SqlDelightChessUserDataDataSource(
         .insertChessUserData(
             userId = chessUserData.userId,
             rating = chessUserData.rating,
+            isProfileActive = chessUserData.isProfileActive.toLong(),
         )
 
     override fun updateChessUserData(chessUserData: ChessUserData) = chessUserDataQueries
         .updateChessUserData(
             userId = chessUserData.userId,
             rating = chessUserData.rating,
+            isProfileActive = chessUserData.isProfileActive.toLong(),
         )
 
     override fun deleteChessUserData(chessUserData: ChessUserData) = chessUserDataQueries
@@ -32,3 +34,5 @@ class SqlDelightChessUserDataDataSource(
         )
 
 }
+
+fun Boolean.toLong() = if (this) 1L else 0L

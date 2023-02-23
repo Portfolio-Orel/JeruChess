@@ -35,4 +35,26 @@ class KtorUsersClient(
         }
     }
 
+    override suspend fun getUserByPhoneNumber(phoneNumber: String): User? {
+        try {
+            val result = httpClient.get {
+                url("$baseUrl/$phoneNumber")
+            }
+            return result.body<UserDto>().toUser()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
+    override suspend fun getUserByEmail(email: String): User? {
+        try {
+            val result = httpClient.get {
+                url("$baseUrl/$email")
+            }
+            return result.body<UserDto>().toUser()
+        } catch (e: Exception) {
+            throw e
+        }
+    }
+
 }

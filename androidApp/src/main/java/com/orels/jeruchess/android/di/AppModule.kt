@@ -8,10 +8,26 @@ import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.data.local.DatabaseDriverFactory
 import com.orels.jeruchess.database.JeruChessDatabase
+import com.orels.jeruchess.main.data.chess_user_data.KtorChessUserDataClient
+import com.orels.jeruchess.main.data.chess_user_data.SqlDelightChessUserDataDataSource
+import com.orels.jeruchess.main.data.events.KtorEventsClient
+import com.orels.jeruchess.main.data.events.SqlDelightEventsDataSource
+import com.orels.jeruchess.main.data.events_participants.KtorEventsParticipantsClient
+import com.orels.jeruchess.main.data.events_participants.SqlDelightEventsParticipantsDataSource
 import com.orels.jeruchess.main.data.main.KtorMainClient
 import com.orels.jeruchess.main.data.main.SqlDelightMainDataSource
+import com.orels.jeruchess.main.data.users.KtorUsersClient
+import com.orels.jeruchess.main.data.users.SqlDelightUsersDataSource
+import com.orels.jeruchess.main.domain.data.chess_user_data.ChessUserDataClient
+import com.orels.jeruchess.main.domain.data.chess_user_data.ChessUserDataDataSource
+import com.orels.jeruchess.main.domain.data.events.EventsClient
+import com.orels.jeruchess.main.domain.data.events.EventsDataSource
+import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
+import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsDataSource
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
+import com.orels.jeruchess.main.domain.data.users.UsersClient
+import com.orels.jeruchess.main.domain.data.users.UsersDataSource
 import com.squareup.sqldelight.db.SqlDriver
 import dagger.Module
 import dagger.Provides
@@ -48,6 +64,67 @@ object AppModule {
     ): MainDataSource {
         return SqlDelightMainDataSource(JeruChessDatabase(driver))
     }
+
+    @Provides
+    @Singleton
+    fun provideUserClient(
+        httpClient: HttpClient
+    ): UsersClient = KtorUsersClient(
+        httpClient = httpClient
+    )
+
+    @Provides
+    @Singleton
+    fun provideUsersDataSource(
+        driver: SqlDriver,
+    ): UsersDataSource =
+        SqlDelightUsersDataSource(JeruChessDatabase(driver))
+
+
+    @Provides
+    @Singleton
+    fun provideEventsDataSource(
+        driver: SqlDriver,
+    ): EventsDataSource =
+        SqlDelightEventsDataSource(JeruChessDatabase(driver))
+
+    @Provides
+    @Singleton
+    fun provideEventsClient(
+        httpClient: HttpClient
+    ): EventsClient = KtorEventsClient(
+        httpClient = httpClient
+    )
+
+    @Provides
+    @Singleton
+    fun provideEventsParticipantsDataSource(
+        driver: SqlDriver,
+    ): EventsParticipantsDataSource =
+        SqlDelightEventsParticipantsDataSource(JeruChessDatabase(driver))
+
+    @Provides
+    @Singleton
+    fun provideEventsParticipantsClient(
+        httpClient: HttpClient
+    ): EventsParticipantsClient = KtorEventsParticipantsClient(
+        httpClient = httpClient
+    )
+
+    @Provides
+    @Singleton
+    fun provideChessUsersDataSource(
+        driver: SqlDriver,
+    ): ChessUserDataDataSource =
+        SqlDelightChessUserDataDataSource(JeruChessDatabase(driver))
+
+    @Provides
+    @Singleton
+    fun provideChessUsersClient(
+        httpClient: HttpClient
+    ): ChessUserDataClient = KtorChessUserDataClient(
+        httpClient = httpClient
+    )
 
     @Provides
     @Singleton
