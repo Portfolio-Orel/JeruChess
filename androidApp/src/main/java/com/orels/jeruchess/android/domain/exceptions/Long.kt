@@ -3,18 +3,12 @@
 package com.orels.jeruchess.android.domain.exceptions
 
 import androidx.annotation.StringRes
-import com.google.type.DateTime
 import com.orels.jeruchess.android.R
 import java.util.*
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.DurationUnit
-
-fun Long.toDayOfMonth(): Int =
-    DateTime.newBuilder().setSeconds(this.secondsInt).build().day
 
 @StringRes
 fun Long.toMonthAcronym(): Int {
-    return when (getMonth()) {
+    return when (month) {
         1 -> R.string.january_acronym
         2 -> R.string.february_acronym
         3 -> R.string.march_acronym
@@ -33,7 +27,7 @@ fun Long.toMonthAcronym(): Int {
 
 @StringRes
 fun Long.toDayName(): Int {
-    return when (getDayOfWeek()) {
+    return when (dayOfWeek) {
         1 -> R.string.sunday
         2 -> R.string.monday
         3 -> R.string.tuesday
@@ -45,22 +39,21 @@ fun Long.toDayName(): Int {
     }
 }
 
-val Long.secondsInt get() = this.seconds.toInt(DurationUnit.SECONDS)
+val Long.millisecondsLong
+    get() =
+        if (this.toString().length > 10) {
+            this
+        } else {
+            this * 1000
+        }
 
-fun Long.getDayOfMonth(): Int {
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = this
-    return calendar.get(Calendar.DAY_OF_MONTH)
-}
+val Long.dayOfMonth get() = calendar().get(Calendar.DAY_OF_MONTH) + 1
+val Long.dayOfWeek get() = calendar().get(Calendar.DAY_OF_WEEK)
+val Long.month get() = calendar().get(Calendar.MONTH)
 
-fun Long.getDayOfWeek(): Int {
+fun Long.calendar(): Calendar {
+    val date = Date(this.millisecondsLong)
     val calendar = Calendar.getInstance()
-    calendar.timeInMillis = this
-    return calendar.get(Calendar.DAY_OF_WEEK)
-}
-
-fun Long.getMonth(): Int {
-    val calendar = Calendar.getInstance()
-    calendar.timeInMillis = this
-    return calendar.get(Calendar.MONTH)
+    calendar.time = date
+    return calendar
 }

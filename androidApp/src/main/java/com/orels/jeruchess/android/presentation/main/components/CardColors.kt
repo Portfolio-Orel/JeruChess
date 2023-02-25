@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.graphics.Color
 
 data class CardColor(
-    val backgroundColor: Color,
+    val background: Color,
     val primary: Color,
 )
 
@@ -36,62 +36,62 @@ class CardColors {
 
         private val lightColors = listOf(
             CardColor(
-                backgroundColor = Color(0xFFE0E0E0),
+                background = Color(0xFFE0E0E0),
                 primary = Color(0xFF473C61),
             ),
             CardColor(
-                backgroundColor = Color(0xFFCB9CA3),
+                background = Color(0xFFCB9CA3),
                 primary = Color(0xFF5B2529),
             ),
             CardColor(
-                backgroundColor = Color(0xFF9E9E9E),
+                background = Color(0xFF9E9E9E),
                 primary = Color(0xFF000000),
             ),
             CardColor(
-                backgroundColor = Color(0xFF9DCBC9),
+                background = Color(0xFF9DCBC9),
                 primary = Color(0xFF136A65),
             ),
             CardColor(
-                backgroundColor = Color(0xFFC1CB9D),
+                background = Color(0xFFC1CB9D),
                 primary = Color(0xFF42510B),
             ),
             CardColor(
-                backgroundColor = Color(0xFFE4B875),
+                background = Color(0xFFE4B875),
                 primary = Color(0xFF66461C),
             ),
             CardColor(
-                backgroundColor = Color(0xFFB0BBBC),
+                background = Color(0xFFB0BBBC),
                 primary = Color(0xFF3A4646),
             ),
         )
 
         private val darkColors = listOf(
             CardColor(
-                backgroundColor = Color(0xFFE0E0E0),
+                background = Color(0xFFE0E0E0),
                 primary = Color(0xFF473C61),
             ),
             CardColor(
-                backgroundColor = Color(0xFFCB9CA3),
+                background = Color(0xFFCB9CA3),
                 primary = Color(0xFF5B2529),
             ),
             CardColor(
-                backgroundColor = Color(0xFF9E9E9E),
+                background = Color(0xFF9E9E9E),
                 primary = Color(0xFF000000),
             ),
             CardColor(
-                backgroundColor = Color(0xFF9DCBC9),
+                background = Color(0xFF9DCBC9),
                 primary = Color(0xFF136A65),
             ),
             CardColor(
-                backgroundColor = Color(0xFFC1CB9D),
+                background = Color(0xFFC1CB9D),
                 primary = Color(0xFF42510B),
             ),
             CardColor(
-                backgroundColor = Color(0xFFE4B875),
+                background = Color(0xFFE4B875),
                 primary = Color(0xFF66461C),
             ),
             CardColor(
-                backgroundColor = Color(0xFFB0BBBC),
+                background = Color(0xFFB0BBBC),
                 primary = Color(0xFF3A4646),
             ),
         )

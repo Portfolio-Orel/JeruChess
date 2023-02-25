@@ -3,13 +3,20 @@ package com.orels.jeruchess.utils
 import com.orels.jeruchess.main.domain.model.Event
 
 class StubEvents {
+
     companion object {
+        private fun getRandomDateFromLastYear(): Long {
+            val now = 1677313326L
+            val lastYear = now - 31556926L
+            return (lastYear..now).random()
+        }
+
         val Events = (0..9).map {
             Event(
                 id = it.toString(),
                 name = "Event $it",
                 description = "Description $it",
-                date = (1677258267L + it),
+                date = getRandomDateFromLastYear(),
                 price = 60L + it,
                 currency = "Currency $it",
                 roundNumber = 5 + it,
