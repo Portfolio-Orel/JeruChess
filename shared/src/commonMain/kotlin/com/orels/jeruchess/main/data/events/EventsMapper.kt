@@ -10,7 +10,10 @@ fun EventEntity.toEvent() = Event(
     date = date,
     price = price,
     currency = currency,
-    minAge = minAge,
-    minRating = minRating,
-    maxRating = maxRating
+    roundNumber = roundNumber.toInt(),
+    eventType = eventType,
+    eventFormat = eventFormat,
+    isRatingIsrael = isRatingIsrael == 1L,
+    isRatingFide = isRatingFide == 1L,
+    ratingType = ratingType
 )

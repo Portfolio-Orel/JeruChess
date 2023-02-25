@@ -2,6 +2,7 @@ package com.orels.jeruchess.android.presentation.main
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -15,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
+import com.orels.jeruchess.android.presentation.main.components.EventCard
 import com.orels.jeruchess.main.presentation.MainState
 
 @Composable
@@ -77,10 +79,16 @@ fun BottomBar(
 fun MainContent(
     viewModel: AndroidMainViewModel,
 ) {
-    Row(
+    val state = viewModel.state.value
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Text("Main Content")
+        items(state.events.size) { index ->
+            EventCard(
+                event = state.events[index],
+                modifier = Modifier.padding(8.dp)
+            )
+        }
     }
 }

@@ -7,7 +7,10 @@ data class Event(
     val date: Long,
     val price: Long,
     val currency: String,
-    val minAge: Long,
-    val minRating: Long,
-    val maxRating: Long
+    val roundNumber: Int,
+    val eventType: String,
+    val eventFormat: String,
+    val isRatingIsrael: Boolean,
+    val isRatingFide: Boolean,
+    val ratingType: String,
 )

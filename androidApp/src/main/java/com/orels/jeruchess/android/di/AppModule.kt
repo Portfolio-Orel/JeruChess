@@ -1,12 +1,15 @@
 package com.orels.jeruchess.android.di
 
 import android.app.Application
+import com.orels.jeruchess.NetworkConstants
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.data.interactor.AuthInteractorImpl
 import com.orels.jeruchess.android.domain.annotation.AuthConfigFile
+import com.orels.jeruchess.android.domain.annotation.BaseUrl
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.data.local.DatabaseDriverFactory
+import com.orels.jeruchess.core.data.remote.HttpClientFactory
 import com.orels.jeruchess.database.JeruChessDatabase
 import com.orels.jeruchess.main.data.chess_user_data.KtorChessUserDataClient
 import com.orels.jeruchess.main.data.chess_user_data.SqlDelightChessUserDataDataSource
@@ -42,9 +45,18 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(): HttpClient {
-        return com.orels.jeruchess.core.data.remote.HttpClientFactory().create()
-    }
+    @BaseUrl
+    fun provideBaseUrl(): String = NetworkConstants.BASE_URL
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(
+        @BaseUrl baseUrl: String,
+    ): HttpClient = HttpClientFactory()
+        .create(
+            baseUrl = baseUrl
+        )
+
 
     @Provides
     @Singleton

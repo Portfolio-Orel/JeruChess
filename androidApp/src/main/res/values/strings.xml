@@ -41,4 +41,30 @@
     <string name="location_icon">Location icon</string>
     <string name="phone_number">Phone number</string>
     <string name="confirm">Confirm</string>
+
+    <!--    Dates Acronyms   -->
+    <string name="january_acronym">Jan</string>
+    <string name="february_acronym">Feb</string>
+    <string name="march_acronym">Mar</string>
+    <string name="april_acronym">Apr</string>
+    <string name="may_acronym">May</string>
+    <string name="june_acronym">Jun</string>
+    <string name="july_acronym">Jul</string>
+    <string name="august_acronym">Aug</string>
+    <string name="september_acronym">Sep</string>
+    <string name="october_acronym">Oct</string>
+    <string name="november_acronym">Nov</string>
+    <string name="december_acronym">Dec</string>
+    <!--    Dates Acronyms    -->
+
+    <!--    Days    -->
+    <string name="sunday">Sunday</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <!--    Days    -->
+
 </resources>

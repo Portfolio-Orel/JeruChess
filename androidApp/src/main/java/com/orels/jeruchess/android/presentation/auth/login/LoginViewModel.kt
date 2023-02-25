@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
+import com.orels.jeruchess.main.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -18,6 +19,20 @@ class LoginViewModel @Inject constructor(
 
     var state by mutableStateOf(LoginState())
 
+    init {
+        observeUser()
+    }
+
+    private fun observeUser() {
+        viewModelScope.launch {
+            authInteractor.getUserFlow().collect { user ->
+                state = state.copy(
+                    authState = if (user == null) AuthState.UNAUTHENTICATED else AuthState.AUTHENTICATED
+                )
+            }
+        }
+    }
+
     private fun loginWithGoogle(activity: Activity) {
         viewModelScope.launch {
             authInteractor.loginWithGoogle(activity)
@@ -28,7 +43,11 @@ class LoginViewModel @Inject constructor(
         state = state.copy(isLoadingLogin = true)
         viewModelScope.launch {
             if (phoneNumber.length < 8) {
-                authInteractor.register(phoneNumber, "")
+                authInteractor.register(
+                    User(
+                        phoneNumber = phoneNumber,
+                    )
+                )
             } else {
                 authInteractor.loginWithPhone(phoneNumber)
             }

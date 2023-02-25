@@ -3,6 +3,7 @@ package com.orels.jeruchess.main.data.events_participants
 import com.orels.jeruchess.main.domain.model.EventParticipant
 import kotlinx.serialization.SerialName
 
+@kotlinx.serialization.Serializable
 data class EventParticipantDto(
     @SerialName("user_id") val userId: String,
     @SerialName("event_id") val eventId: String,

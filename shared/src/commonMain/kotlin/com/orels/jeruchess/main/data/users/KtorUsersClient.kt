@@ -16,6 +16,7 @@ class KtorUsersClient(
         try {
             val result = httpClient.post {
                 url(baseUrl)
+                header("Content-Type", "application/json")
                 setBody(user.toUserDto())
             }
             return result.body<UserDto>().toUser()

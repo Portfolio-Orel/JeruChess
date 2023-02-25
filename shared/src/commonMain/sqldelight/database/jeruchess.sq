@@ -2,11 +2,12 @@ CREATE TABLE  userEntity(
     id TEXT NOT NULL PRIMARY KEY,
     firstName TEXT NOT NULL,
     lastName TEXT NOT NULL,
-    gender TEXT NOT NULL,
+    gender TEXT NOT NULL DEFAULT 'MALE',
     email TEXT NOT NULL,
     phoneNumber TEXT NOT NULL,
     playerNumber TEXT NOT NULL,
-    dateOfBirth INTEGER NOT NULL
+    dateOfBirth INTEGER NOT NULL,
+    token TEXT
 );
 
 CREATE TABLE eventEntity(
@@ -16,9 +17,12 @@ CREATE TABLE eventEntity(
     date INTEGER NOT NULL,
     price INTEGER NOT NULL,
     currency TEXT NOT NULL,
-    minAge INTEGER NOT NULL,
-    minRating INTEGER NOT NULL,
-    maxRating INTEGER NOT NULL
+    roundNumber INTEGER NOT NULL,
+    eventType TEXT NOT NULL,
+    eventFormat TEXT NOT NULL,
+    isRatingIsrael INTEGER NOT NULL,
+    isRatingFide INTEGER NOT NULL,
+    ratingType TEXT NOT NULL
 );
 
 CREATE TABLE chessUserDataEntity(
@@ -77,8 +81,9 @@ INSERT OR REPLACE
     email,
     phoneNumber,
     playerNumber,
-    dateOfBirth
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+    dateOfBirth,
+    token
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteUser:
 DELETE FROM userEntity;
@@ -113,10 +118,13 @@ INSERT OR REPLACE
     date,
     price,
     currency,
-    minAge,
-    minRating,
-    maxRating
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+    roundNumber,
+    eventType,
+    eventFormat,
+    isRatingIsrael,
+    isRatingFide,
+    ratingType
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteEvent:
 DELETE FROM eventEntity
@@ -129,9 +137,12 @@ SET name = ?,
     date = ?,
     price = ?,
     currency = ?,
-    minAge = ?,
-    minRating = ?,
-    maxRating = ?;
+    roundNumber = ?,
+    eventType = ?,
+    eventFormat = ?,
+    isRatingIsrael = ?,
+    isRatingFide = ?
+WHERE id = ?;
 -- Events --
 
 -- EventParticipants --

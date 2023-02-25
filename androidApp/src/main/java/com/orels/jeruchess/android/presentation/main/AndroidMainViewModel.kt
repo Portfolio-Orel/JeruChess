@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orels.jeruchess.main.domain.data.events.EventsClient
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
 import com.orels.jeruchess.main.presentation.MainEvent
@@ -15,11 +16,16 @@ import javax.inject.Inject
 @HiltViewModel
 class AndroidMainViewModel @Inject constructor(
     private val client: MainClient,
+    private val eventClient: EventsClient,
     private val dataSource: MainDataSource,
 ) : ViewModel() {
 
     private val viewModel by lazy {
-        MainViewModel(client, dataSource, coroutineScope = viewModelScope)
+        MainViewModel(client, eventClient, dataSource, coroutineScope = viewModelScope)
+    }
+
+    init {
+
     }
 
     val state = viewModel.state
