@@ -3,8 +3,8 @@ package com.orels.jeruchess.main.data.events_participants
 import com.orels.jeruchess.NetworkConstants
 import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
 import com.orels.jeruchess.main.domain.model.EventParticipant
+import com.orels.jeruchess.utils.StubData
 import io.ktor.client.*
-import io.ktor.client.call.*
 import io.ktor.client.request.*
 
 class KtorEventsParticipantsClient(
@@ -15,10 +15,11 @@ class KtorEventsParticipantsClient(
 
     override suspend fun getAllEventsParticipants(eventId: String): List<EventParticipant> {
         try {
-            val result = httpClient.get {
-                url(baseUrl(eventId))
-            }
-            return result.body<List<EventParticipantDto>>().toEventParticipants()
+//            val result = httpClient.get {
+//                url(baseUrl(eventId))
+//            }
+//            return result.body<List<EventParticipantDto>>().toEventParticipants()
+            return StubData.EventsParticipants.filter { it.eventId == eventId }
         } catch (e: Exception) {
             throw e
         }

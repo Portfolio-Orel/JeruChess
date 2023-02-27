@@ -2,6 +2,7 @@ package com.orels.jeruchess.main.data.events
 
 import com.orels.jeruchess.main.domain.data.events.EventsClient
 import com.orels.jeruchess.main.domain.model.Event
+import com.orels.jeruchess.utils.StubData
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -25,11 +26,12 @@ class KtorEventsClient(
 
     override suspend fun getAllEvents(): List<Event> {
         try {
-            val result = httpClient.get {
-                url(baseUrl)
-            }
-            val events = result.body<List<EventDto>>()
-            return events.map { it.toEvent() }
+//            val result = httpClient.get {
+//                url(baseUrl)
+//            }
+//            val events = result.body<List<EventDto>>()
+//            return events.map { it.toEvent() }
+            return StubData.Events
         } catch (e: Exception) {
             throw e
         }

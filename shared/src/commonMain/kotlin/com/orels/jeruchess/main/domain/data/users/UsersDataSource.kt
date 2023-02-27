@@ -5,6 +5,6 @@ import com.orels.jeruchess.main.domain.model.User
 
 interface UsersDataSource {
     suspend fun saveUser(user: User)
-
     suspend fun getUserFlow(): CommonFlow<User?>
+    suspend fun clearUser()
 }

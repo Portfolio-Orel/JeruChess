@@ -22,7 +22,9 @@ CREATE TABLE eventEntity(
     eventFormat TEXT NOT NULL,
     isRatingIsrael INTEGER NOT NULL,
     isRatingFide INTEGER NOT NULL,
-    ratingType TEXT NOT NULL
+    ratingType TEXT NOT NULL,
+    gameId TEXT NOT NULL,
+    FOREIGN KEY(gameId) REFERENCES gameEntity(id)
 );
 
 CREATE TABLE chessUserDataEntity(
@@ -35,6 +37,11 @@ CREATE TABLE chessUserDataEntity(
 CREATE TABLE eventParticipantEntity(
     eventId TEXT NOT NULL,
     userId TEXT NOT NULL,
+    isPaid INTEGER NOT NULL,
+    paidAt INTEGER,
+    paidAmount INTEGER,
+    paymentType TEXT,
+    isActive INTEGER NOT NULL,
     FOREIGN KEY(eventId) REFERENCES eventEntity(id),
     FOREIGN KEY(userId) REFERENCES userEntity(id)
 );
@@ -47,6 +54,16 @@ CREATE TABLE clubDataEntity(
     facebook TEXT,
     instagram TEXT,
     twitter TEXT
+);
+
+CREATE TABLE gameEntity(
+    id TEXT NOT NULL PRIMARY KEY,
+    timeStartMin INTEGER NOT NULL,
+    incrementBeforeTimeControl INTEGER NOT NULL,
+    movesNumToTimeControl INTEGER,
+    timeBumpAfterTimeControl INTEGER,
+    incrementAfterTimeControl INTEGER,
+    type TEXT NOT NULL
 );
 
 -- Club --
@@ -123,8 +140,9 @@ INSERT OR REPLACE
     eventFormat,
     isRatingIsrael,
     isRatingFide,
-    ratingType
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+    ratingType,
+    gameId
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteEvent:
 DELETE FROM eventEntity
@@ -155,8 +173,13 @@ insertEventParticipant:
 INSERT OR REPLACE
  INTO eventParticipantEntity (
     eventId,
-    userId
-) VALUES (?, ?);
+    userId,
+    isPaid,
+    paidAt,
+    paidAmount,
+    paymentType,
+    isActive
+) VALUES (?, ?, ?, ?, ?, ?, ?);
 
 deleteEventParticipant:
 DELETE FROM eventParticipantEntity

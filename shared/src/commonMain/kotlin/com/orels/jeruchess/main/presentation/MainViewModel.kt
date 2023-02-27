@@ -3,9 +3,11 @@ package com.orels.jeruchess.main.presentation
 import com.orels.jeruchess.core.util.CommonStateFlow
 import com.orels.jeruchess.core.util.toCommonStateFlow
 import com.orels.jeruchess.main.domain.data.events.EventsClient
+import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
+import com.orels.jeruchess.main.domain.data.games.GamesClient
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
-import com.orels.jeruchess.utils.StubEvents
+import com.orels.jeruchess.main.domain.model.EventParticipant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +17,8 @@ import kotlinx.coroutines.launch
 class MainViewModel(
     private val client: MainClient,
     private val eventsClient: EventsClient,
+    private val gamesClient: GamesClient,
+    private val eventsParticipantsClient: EventsParticipantsClient,
     private val dataSource: MainDataSource,
     coroutineScope: CoroutineScope?
 ) {
@@ -25,12 +29,19 @@ class MainViewModel(
     init {
         viewModelScope.launch {
             try {
-                val events = StubEvents.Events.sortedBy {
+                val events = eventsClient.getAllEvents().sortedBy {
                     it.date
+                }
+                val games = gamesClient.getGamesByEventIds(events.map { it.id })
+                val eventsParticipants = mutableListOf<EventParticipant>()
+                events.groupBy { it.id }.forEach {
+                    eventsParticipants += eventsParticipantsClient.getAllEventsParticipants(it.key)
                 }
                 _state.update {
                     it.copy(
-                        events = events
+                        events = events,
+                        eventsParticipants = eventsParticipants,
+                        games = games
                     )
                 }
             } catch (e: Exception) {

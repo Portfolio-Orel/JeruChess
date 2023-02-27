@@ -9,7 +9,6 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,7 +23,7 @@ import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
-import com.orels.jeruchess.android.core.presentation.Routes
+import com.orels.jeruchess.android.core.presentation.Screens
 import com.orels.jeruchess.android.presentation.components.Input
 import com.orels.jeruchess.android.presentation.components.Loading
 import com.orels.jeruchess.android.presentation.components.noRippleClickable
@@ -37,24 +36,7 @@ fun LoginScreen(
     val state = viewModel.state
     val context = LocalContext.current
 
-    navController.graph
     val phoneNumber = remember { mutableStateOf("") }
-
-    LaunchedEffect(key1 = state.authState) {
-        if (state.authState == AuthState.AUTHENTICATED) {
-            navController.navigate(Routes.MAIN) {
-                popUpTo(Routes.LOGIN) { inclusive = true }
-            }
-        } else if (state.authState == AuthState.REGISTRATION_REQUIRED) {
-            navController.navigate(
-                Routes.withArgs(
-                    Routes.REGISTER,
-                    state.user.phoneNumber,
-                    state.user.email
-                )
-            )
-        }
-    }
 
     if (state.isLoading) {
         Box(
@@ -118,8 +100,7 @@ fun LoginScreen(
                             .noRippleClickable {
                                 // navigate to register with phoneNumber and email
                                 navController.navigate(
-                                    Routes.withArgs(
-                                        Routes.REGISTER,
+                                    Screens.Register.withArgs(
                                         state.user.phoneNumber,
                                         state.user.email
                                     )

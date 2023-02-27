@@ -36,7 +36,7 @@ class AuthInteractorImpl @Inject constructor(
         var isConfigured: Boolean = false
     }
 
-    override fun initialize(configFile: ConfigFile) {
+    override suspend fun initialize(configFile: ConfigFile) {
         if (isConfigured) return
         Amplify.addPlugin(AWSCognitoAuthPlugin())
         Amplify.configure(
@@ -44,6 +44,9 @@ class AuthInteractorImpl @Inject constructor(
             context
         )
         isConfigured = true
+        if(!isUserLoggedIn()) {
+            usersDataSource.clearUser()
+        }
     }
 
     override suspend fun login(email: String, password: String) {
@@ -107,12 +110,16 @@ class AuthInteractorImpl @Inject constructor(
     }
 
     override suspend fun logout() {
-        TODO("Not yet implemented")
     }
 
-    override suspend fun isUserLoggedIn(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override suspend fun isUserLoggedIn(): Boolean =
+        try {
+            val authSession = Amplify.Auth.fetchAuthSession()
+            authSession.isSignedIn
+        } catch (e: Exception) {
+            false
+        }
+
 
     override suspend fun isUserRegistered(email: String?, phoneNumber: String?): Boolean {
 //        usersClient.getUser()

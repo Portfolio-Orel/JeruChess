@@ -1,5 +1,6 @@
 package com.orels.jeruchess.main.data.events
 
+import com.orels.jeruchess.main.domain.model.Currency
 import com.orels.jeruchess.main.domain.model.Event
 import kotlinx.serialization.SerialName
 
@@ -17,6 +18,7 @@ data class EventDto(
     @SerialName("is_rating_israel") val isRatingIsrael: Boolean,
     @SerialName("is_rating_fide") val isRatingFide: Boolean,
     @SerialName("rating_type") val ratingType: String,
+    @SerialName("game_id") val gameId: String
 ) {
     fun toEvent() = Event(
         id = id,
@@ -24,13 +26,14 @@ data class EventDto(
         description = description,
         date = date,
         price = price,
-        currency = currency,
+        currency = Currency.valueOf(currency),
         roundNumber = roundNumber,
         eventType = eventType,
         eventFormat = eventFormat,
         isRatingIsrael = isRatingIsrael,
         isRatingFide = isRatingFide,
-        ratingType = ratingType
+        ratingType = ratingType,
+        gameId = gameId
     )
 }
 
@@ -40,11 +43,12 @@ fun Event.toEventDto() = EventDto(
     description = description,
     date = date,
     price = price,
-    currency = currency,
+    currency = currency.name.lowercase(),
     roundNumber = roundNumber,
     eventType = eventType,
     eventFormat = eventFormat,
     isRatingIsrael = isRatingIsrael,
     isRatingFide = isRatingFide,
-    ratingType = ratingType
+    ratingType = ratingType,
+    gameId = gameId
 )

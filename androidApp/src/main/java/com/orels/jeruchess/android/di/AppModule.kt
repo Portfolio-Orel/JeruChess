@@ -17,6 +17,8 @@ import com.orels.jeruchess.main.data.events.KtorEventsClient
 import com.orels.jeruchess.main.data.events.SqlDelightEventsDataSource
 import com.orels.jeruchess.main.data.events_participants.KtorEventsParticipantsClient
 import com.orels.jeruchess.main.data.events_participants.SqlDelightEventsParticipantsDataSource
+import com.orels.jeruchess.main.data.games.KtorGamesClient
+import com.orels.jeruchess.main.data.games.SqlDelightGamesDataSource
 import com.orels.jeruchess.main.data.main.KtorMainClient
 import com.orels.jeruchess.main.data.main.SqlDelightMainDataSource
 import com.orels.jeruchess.main.data.users.KtorUsersClient
@@ -27,6 +29,8 @@ import com.orels.jeruchess.main.domain.data.events.EventsClient
 import com.orels.jeruchess.main.domain.data.events.EventsDataSource
 import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
 import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsDataSource
+import com.orels.jeruchess.main.domain.data.games.GamesClient
+import com.orels.jeruchess.main.domain.data.games.GamesDataSource
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
 import com.orels.jeruchess.main.domain.data.users.UsersClient
@@ -135,6 +139,21 @@ object AppModule {
     fun provideChessUsersClient(
         httpClient: HttpClient
     ): ChessUserDataClient = KtorChessUserDataClient(
+        httpClient = httpClient
+    )
+
+    @Provides
+    @Singleton
+    fun provideGamesDataSource(
+        driver: SqlDriver,
+    ): GamesDataSource =
+        SqlDelightGamesDataSource(JeruChessDatabase(driver))
+
+    @Provides
+    @Singleton
+    fun provideGamesClient(
+        httpClient: HttpClient
+    ): GamesClient = KtorGamesClient(
         httpClient = httpClient
     )
 

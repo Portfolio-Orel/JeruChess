@@ -19,20 +19,6 @@ class LoginViewModel @Inject constructor(
 
     var state by mutableStateOf(LoginState())
 
-    init {
-        observeUser()
-    }
-
-    private fun observeUser() {
-        viewModelScope.launch {
-            authInteractor.getUserFlow().collect { user ->
-                state = state.copy(
-                    authState = if (user == null) AuthState.UNAUTHENTICATED else AuthState.AUTHENTICATED
-                )
-            }
-        }
-    }
-
     private fun loginWithGoogle(activity: Activity) {
         viewModelScope.launch {
             authInteractor.loginWithGoogle(activity)

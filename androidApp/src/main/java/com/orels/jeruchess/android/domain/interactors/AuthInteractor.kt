@@ -6,7 +6,7 @@ import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.model.User
 
 interface AuthInteractor {
-    fun initialize(configFile: ConfigFile)
+    suspend fun initialize(configFile: ConfigFile)
     suspend fun login(email: String, password: String)
     suspend fun loginWithGoogle(activity: Activity)
     suspend fun loginWithPhone(phoneNumber: String)

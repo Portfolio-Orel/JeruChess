@@ -1,12 +1,15 @@
 package com.orels.jeruchess.android.core.presentation
 
-object Routes {
-    const val LOGIN = "login"
-    const val FORGOT_PASSWORD = "forgot_password"
-    const val REGISTER = "register"
-    const val MAIN = "main"
+import androidx.annotation.StringRes
+import com.orels.jeruchess.android.R
 
-    fun withArgs(route: String, vararg args: String?): String {
+enum class Screens(val route: String, @StringRes val label: Int = R.string.empty_string) {
+    Login("login"),
+    Register("register"),
+    Main("main", R.string.label_main),
+    ForgotPassword("forgotPassword");
+
+    fun withArgs(vararg args: String?): String {
         return buildString {
             append(route)
             args.forEach { value ->

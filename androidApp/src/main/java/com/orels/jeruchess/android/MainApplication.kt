@@ -6,6 +6,9 @@ import com.orels.jeruchess.android.domain.annotation.AuthConfigFile
 import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import dagger.hilt.android.HiltAndroidApp
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -20,6 +23,8 @@ class MainApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         FirebaseApp.initializeApp(this)
-        authInteractor.initialize(config)
+       CoroutineScope(Dispatchers.Main).launch {
+            authInteractor.initialize(config)
+        }
     }
 }

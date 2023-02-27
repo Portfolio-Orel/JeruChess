@@ -34,4 +34,7 @@ class SqlDelightUsersDataSource(
             .map { it.executeAsOneOrNull() }
             .map { it?.toUser() }
             .toCommonFlow()
+
+    override suspend fun clearUser() = usersQueries.deleteUser()
+
 }

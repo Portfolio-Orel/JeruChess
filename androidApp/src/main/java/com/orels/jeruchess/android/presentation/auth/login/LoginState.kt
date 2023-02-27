@@ -10,12 +10,11 @@ data class LoginState(
     ),
     val isLoading: Boolean = false,
     val isLoadingLogin: Boolean = false,
-    val authState: AuthState = AuthState.UNAUTHENTICATED,
+    val authState: AuthState = AuthState.DEFAULT,
     val error: String? = null
 )
 
 enum class AuthState {
-    AUTHENTICATED,
     REGISTRATION_REQUIRED,
-    UNAUTHENTICATED,
+    DEFAULT,
 }

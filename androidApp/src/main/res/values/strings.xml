@@ -41,6 +41,8 @@
     <string name="location_icon">Location icon</string>
     <string name="phone_number">Phone number</string>
     <string name="confirm">Confirm</string>
+    <string name="timer">Timer</string>
+    <string name="round">Round</string>
 
     <!--    Dates Acronyms   -->
     <string name="january_acronym">Jan</string>
@@ -65,6 +67,14 @@
     <string name="thursday">Thursday</string>
     <string name="friday">Friday</string>
     <string name="saturday">Saturday</string>
+    <string name="participants">Participants</string>
     <!--    Days    -->
+
+    <!--    Screen Labels    -->
+    <string name="label_main">Events</string>
+    <string name="label_navigation">Navigate</string>
+    <string name="money">Money</string>
+    <!--    Screen Labels    -->
+
 
 </resources>
