@@ -1,5 +1,6 @@
 package com.orels.jeruchess.android.presentation.main.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -35,6 +36,7 @@ fun EventCard(
     game: Game? = null,
     maxRounds: Int = 1,
     participants: List<EventParticipant> = emptyList(),
+    isPaid: Boolean = false,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val cardColor = remember { CardColors.getCardColor(isDarkTheme) }
@@ -71,7 +73,7 @@ fun EventCard(
                 ParticipantsNumber(participants = participants.count())
                 RoundNumber(maxRounds = maxRounds, currentRound = event.roundNumber)
                 Spacer(modifier = Modifier.weight(1f))
-                Price(event = event)
+                Price(event = event, isPaid = participants.size % 2 == 1)
             }
         }
     }
@@ -148,18 +150,29 @@ fun EventDetails(
 fun Price(
     event: Event,
     modifier: Modifier = Modifier,
+    isPaid: Boolean = false,
 ) {
     Row(
         modifier = modifier.padding(bottom = 6.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally)
     ) {
-        Text(
-            text = event.price.toString(),
-            textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.h5,
-        )
-        Currency(currency = event.currency, modifier = Modifier.size(24.dp))
+        if (isPaid) {
+            Image(
+                painter = painterResource(id = R.drawable.paid),
+                contentDescription = stringResource(R.string.paid),
+                modifier = Modifier
+                    .size(36.dp)
+                    .padding(horizontal = 2.dp)
+            )
+        } else {
+            Text(
+                text = event.price.toString(),
+                textAlign = TextAlign.Start,
+                style = MaterialTheme.typography.h5,
+            )
+            Currency(currency = event.currency, modifier = Modifier.size(24.dp))
+        }
     }
 }
 
