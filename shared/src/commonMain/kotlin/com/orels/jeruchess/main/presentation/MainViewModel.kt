@@ -7,6 +7,7 @@ import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipan
 import com.orels.jeruchess.main.domain.data.games.GamesClient
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
+import com.orels.jeruchess.main.domain.data.users.UsersDataSource
 import com.orels.jeruchess.main.domain.model.EventParticipant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +17,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val client: MainClient,
+    private val usersDataSource: UsersDataSource,
     private val eventsClient: EventsClient,
     private val gamesClient: GamesClient,
     private val eventsParticipantsClient: EventsParticipantsClient,
@@ -52,8 +54,20 @@ class MainViewModel(
                 }
             }
         }
+        observeUser()
     }
 
+    private fun observeUser() {
+        viewModelScope.launch {
+            usersDataSource.getUserFlow().collect { user ->
+                _state.update {
+                    it.copy(
+                        user = user
+                    )
+                }
+            }
+        }
+    }
 
     fun onEvent(event: MainEvent) {
         when (event) {
@@ -162,6 +176,8 @@ class MainViewModel(
                 }
             }
             MainEvent.NavigateToClubAddress -> {}
+            is MainEvent.PayByCard -> TODO()
+            is MainEvent.PayByCash -> TODO()
         }
     }
 }

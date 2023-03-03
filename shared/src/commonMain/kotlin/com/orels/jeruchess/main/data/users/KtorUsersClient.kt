@@ -1,6 +1,5 @@
 package com.orels.jeruchess.main.data.users
 
-import com.orels.jeruchess.NetworkConstants
 import com.orels.jeruchess.main.domain.data.users.UsersClient
 import com.orels.jeruchess.main.domain.model.User
 import io.ktor.client.*
@@ -10,7 +9,7 @@ import io.ktor.client.request.*
 class KtorUsersClient(
     private val httpClient: HttpClient,
 ) : UsersClient {
-    private val baseUrl = NetworkConstants.BASE_URL + "/users"
+    private val baseUrl = "/users"
 
     override suspend fun createUser(user: User): User {
         try {
@@ -26,17 +25,19 @@ class KtorUsersClient(
     }
 
     override suspend fun getUser(userId: String): User? {
-        try {
+        return try {
             val result = httpClient.get {
                 url("$baseUrl/$userId")
+                header("userid", userId)
             }
-            return result.body<UserDto>().toUser()
+            result.body<UserDto?>()?.toUser()
         } catch (e: Exception) {
-            throw e
+            println("Error: ${e.message}")
+            null
         }
     }
 
-    override suspend fun getUserByPhoneNumber(phoneNumber: String): User? {
+    override suspend fun getUserByPhoneNumber(phoneNumber: String): User {
         try {
             val result = httpClient.get {
                 url("$baseUrl/$phoneNumber")

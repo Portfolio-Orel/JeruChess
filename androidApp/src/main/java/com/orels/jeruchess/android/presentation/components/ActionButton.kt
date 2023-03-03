@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,9 @@ fun ActionButton(
         contentColor = MaterialTheme.colors.background,
     ),
     text: String,
+    fontStyle: TextStyle = MaterialTheme.typography.body1,
+    fontWeight: FontWeight = FontWeight.SemiBold,
+    elevation: ButtonElevation = ButtonDefaults.elevation(),
     isLoading: Boolean = false,
 ) {
     Button(
@@ -29,6 +33,7 @@ fun ActionButton(
         shape = MaterialTheme.shapes.medium,
         colors = colors,
         onClick = onClick,
+        elevation = elevation,
     ) {
         if (isLoading) {
             Box(
@@ -54,9 +59,9 @@ fun ActionButton(
         ) {
             Text(
                 text = text,
-                style = MaterialTheme.typography.body1,
+                style = fontStyle,
                 overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = fontWeight,
                 maxLines = 1,
                 color =
                 if (isLoading) Color.Transparent

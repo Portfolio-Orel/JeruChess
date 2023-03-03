@@ -8,5 +8,5 @@ enum class Environment(val value: String) {
 object NetworkConstants {
     private val environment = Environment.DEV
     val BASE_URL =
-        if (environment == Environment.DEV) "chessdev.cn9qgwm3araj.us-east-2.rds.amazonaws.com" else "chessdev.cn9qgwm3araj.us-east-2.rds.amazonaws.com"
+        if (environment == Environment.DEV) "https://g33llytwga.execute-api.us-east-1.amazonaws.com" else "https://g33llytwga.execute-api.us-east-1.amazonaws.com"
 }

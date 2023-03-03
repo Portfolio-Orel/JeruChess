@@ -8,7 +8,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.orels.jeruchess.android.domain.interactors.AuthInteractor
+import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch

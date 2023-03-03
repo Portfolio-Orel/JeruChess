@@ -8,4 +8,6 @@ interface EventsClient {
     suspend fun insertEvent(event: Event)
     suspend fun updateEvent(event: Event)
     suspend fun deleteEvent(event: Event)
+
+    suspend fun getPaymentUrl(event: Event): String
 }

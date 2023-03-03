@@ -4,9 +4,9 @@ import android.app.Application
 import com.orels.jeruchess.NetworkConstants
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.data.interactor.AuthInteractorImpl
+import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.android.domain.annotation.AuthConfigFile
 import com.orels.jeruchess.android.domain.annotation.BaseUrl
-import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.data.local.DatabaseDriverFactory
 import com.orels.jeruchess.core.data.remote.HttpClientFactory
@@ -56,9 +56,11 @@ object AppModule {
     @Singleton
     fun provideHttpClient(
         @BaseUrl baseUrl: String,
+       dataSource: UsersDataSource
     ): HttpClient = HttpClientFactory()
         .create(
-            baseUrl = baseUrl
+            baseUrl = baseUrl,
+            dataSource = dataSource
         )
 
 

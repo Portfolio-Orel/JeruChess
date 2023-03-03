@@ -5,10 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.People
 import androidx.compose.runtime.Composable
@@ -25,18 +22,24 @@ import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.domain.exceptions.dayOfMonth
 import com.orels.jeruchess.android.domain.exceptions.toDayName
 import com.orels.jeruchess.android.domain.exceptions.toMonthAcronym
+import com.orels.jeruchess.android.presentation.components.ActionButton
 import com.orels.jeruchess.main.domain.model.Event
 import com.orels.jeruchess.main.domain.model.EventParticipant
 import com.orels.jeruchess.main.domain.model.Game
 
+typealias OnRegister = (event: Event) -> Unit
+typealias OnCancelRegistration = (event: Event) -> Unit
+
 @Composable
 fun EventCard(
     event: Event,
+    onRegister: OnRegister,
+    onCancelRegistration: OnCancelRegistration,
     modifier: Modifier = Modifier,
     game: Game? = null,
     maxRounds: Int = 1,
     participants: List<EventParticipant> = emptyList(),
-    isPaid: Boolean = false,
+    isRegistered: Boolean = false,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val cardColor = remember { CardColors.getCardColor(isDarkTheme) }
@@ -52,7 +55,7 @@ fun EventCard(
     ) {
         Row(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(horizontal = 24.dp, vertical = 12.dp)
         ) {
             EventDate(
                 event = event,
@@ -73,14 +76,32 @@ fun EventCard(
                 ParticipantsNumber(participants = participants.count())
                 RoundNumber(maxRounds = maxRounds, currentRound = event.roundNumber)
                 Spacer(modifier = Modifier.weight(1f))
-                Price(event = event, isPaid = participants.size % 2 == 1)
+                Price(event = event, isPaid = isRegistered)
+                ActionButton(
+                    modifier = Modifier.padding(top = 8.dp),
+                    onClick = {
+                        if (isRegistered) onCancelRegistration(event) else onRegister(
+                            event
+                        )
+                    },
+                    text = if (isRegistered) stringResource(R.string.cancel) else stringResource(
+                        R.string.register
+                    ),
+                    fontWeight = FontWeight.Normal,
+                    fontStyle = MaterialTheme.typography.body1,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = if (isRegistered) MaterialTheme.colors.error else MaterialTheme.colors.secondary,
+                        contentColor = if (isRegistered) MaterialTheme.colors.onError else MaterialTheme.colors.onSecondary
+                    ),
+                    elevation = ButtonDefaults.elevation(0.dp)
+                )
             }
         }
     }
 }
 
 @Composable
-fun EventDate(
+private fun EventDate(
     event: Event,
     modifier: Modifier = Modifier,
 ) {
@@ -105,7 +126,7 @@ fun EventDate(
 }
 
 @Composable
-fun EventDetails(
+private fun EventDetails(
     event: Event,
     modifier: Modifier = Modifier,
     game: Game? = null,
@@ -147,13 +168,13 @@ fun EventDetails(
 }
 
 @Composable
-fun Price(
+private fun Price(
     event: Event,
     modifier: Modifier = Modifier,
     isPaid: Boolean = false,
 ) {
     Row(
-        modifier = modifier.padding(bottom = 6.dp),
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally)
     ) {
@@ -177,7 +198,7 @@ fun Price(
 }
 
 @Composable
-fun ParticipantsNumber(
+private fun ParticipantsNumber(
     participants: Int,
 ) {
     Row(
@@ -200,7 +221,7 @@ fun ParticipantsNumber(
 }
 
 @Composable
-fun RoundNumber(
+private fun RoundNumber(
     maxRounds: Int,
     currentRound: Int,
 ) {

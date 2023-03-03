@@ -8,4 +8,6 @@ sealed class MainEvent {
     data class AddClub(val clubData: ClubData) : MainEvent()
     data class UpdateClub(val clubData: ClubData) : MainEvent()
     data class DeleteClub(val clubData: ClubData) : MainEvent()
+    data class PayByCard(val eventId: String) : MainEvent()
+    data class PayByCash(val eventId: String) : MainEvent()
 }

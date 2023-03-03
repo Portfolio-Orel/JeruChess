@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.orels.jeruchess.android.domain.interactors.AuthInteractor
+import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.main.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
@@ -21,7 +21,12 @@ class LoginViewModel @Inject constructor(
 
     private fun loginWithGoogle(activity: Activity) {
         viewModelScope.launch {
-            authInteractor.loginWithGoogle(activity)
+            val user = authInteractor.loginWithGoogle(activity)
+            if(user != null && authInteractor.isUserRegistered(user.id)) {
+                authInteractor.saveUser(user)
+            } else {
+                state = state.copy(authState = AuthState.REGISTRATION_REQUIRED)
+            }
         }
     }
 

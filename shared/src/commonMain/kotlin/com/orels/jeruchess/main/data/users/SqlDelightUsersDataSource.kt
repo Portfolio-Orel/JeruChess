@@ -27,6 +27,11 @@ class SqlDelightUsersDataSource(
         )
     }
 
+    override suspend fun getUser(): User? = usersQueries
+        .getUser()
+        .executeAsOneOrNull()
+        ?.toUser()
+
     override suspend fun getUserFlow(): CommonFlow<User?> =
         usersQueries
             .getUser()

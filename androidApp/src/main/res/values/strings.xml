@@ -75,6 +75,18 @@
     <string name="label_navigation">Navigate</string>
     <string name="money">Money</string>
     <string name="paid">Paid</string>
+    <string name="sign_me_up_exclamation">Sign me up!</string>
+    <string name="maybe_later">Maybe later</string>
+    <string name="i_will_pay_now">I\'ll pay now!</string>
+    <string name="register">Register</string>
+    <string name="cancel_registration">Cancel registration</string>
+    <string name="cancel">cancel</string>
+    <string name="i_will_stay_exclamation">I\'ll stay!</string>
+    <string name="yes">Yes</string>
+    <string name="nevermind_i_will_stay_exclamation">Nevermind, I\'ll stay!</string>
+    <string name="what_a_shame_to_see_you_go">What a shame to see you go!</string>
+    <string name="hope_to_see_you_again_soon">Hope to see you again soon</string>
+    <string name="thanks">Thanks</string>
     <!--    Screen Labels    -->
 
 

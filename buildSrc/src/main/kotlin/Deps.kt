@@ -64,13 +64,17 @@ object Deps {
     // FIREBASE
     const val googleServices = "com.google.gms:google-services:4.3.15"
     const val firebaseBom = "com.google.firebase:firebase-bom:31.2.0"
-//    const val firebaseAnalytics = "com.google.firebase:firebase-analytics-ktx"
+
+    //    const val firebaseAnalytics = "com.google.firebase:firebase-analytics-ktx"
     const val firebaseAuth = "com.google.firebase:firebase-auth-ktx:21.1.0"
     const val firebaseFirestore = "com.google.firebase:firebase-firestore-ktx:23.0.3"
     const val firebaseCrashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.2.3"
 
     const val gitLiveAuth = "dev.gitlive:firebase-auth:1.6.2"
     const val gitLiveFirestore = "dev.gitlive:firebase-firestore:1.6.2"
+
+    const val protoDataStore = "androidx.datastore:datastore:1.0.0"
+    const val protoDataStorePreferences = "androidx.datastore:datastore-preferences:1.0.0"
 
     // AWS
     const val desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"

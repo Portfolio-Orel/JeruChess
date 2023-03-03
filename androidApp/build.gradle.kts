@@ -72,6 +72,10 @@ dependencies {
     kaptAndroidTest(Deps.hiltAndroidCompiler)
     androidTestImplementation(Deps.hiltTesting)
 
+
+    implementation(Deps.protoDataStore)
+    implementation(Deps.protoDataStorePreferences)
+
     coreLibraryDesugaring(Deps.desugarJdkLibs)
     implementation(Deps.amplify) {
         exclude(group = "androidx.appcompat", module = "appcompat")

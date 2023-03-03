@@ -1,16 +1,13 @@
 package com.orels.jeruchess.core.data.remote
 
+import com.orels.jeruchess.core.domain.AuthInteractor
 import io.ktor.client.*
-import io.ktor.client.engine.darwin.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
 
 actual class HttpClientFactory {
-    actual fun create(): HttpClient {
-        return HttpClient(Darwin) {
-            install(ContentNegotiation) {
-                json()
-            }
-        }
+    actual fun create(
+        baseUrl: String,
+        authInteractor: AuthInteractor
+    ): HttpClient {
+        TODO("Not yet implemented")
     }
 }

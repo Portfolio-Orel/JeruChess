@@ -2,8 +2,8 @@ package com.orels.jeruchess.android
 
 import android.app.Application
 import com.google.firebase.FirebaseApp
+import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.android.domain.annotation.AuthConfigFile
-import com.orels.jeruchess.android.domain.interactors.AuthInteractor
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.CoroutineScope
