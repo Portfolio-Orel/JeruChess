@@ -24,6 +24,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.core.presentation.Screens
+import com.orels.jeruchess.android.presentation.components.CustomKeyboardType
 import com.orels.jeruchess.android.presentation.components.Input
 import com.orels.jeruchess.android.presentation.components.Loading
 import com.orels.jeruchess.android.presentation.components.noRippleClickable
@@ -69,7 +70,7 @@ fun LoginScreen(
                     title = stringResource(R.string.phone_number),
                     placeholder = stringResource(R.string.phone_number),
                     initialText = "",
-                    keyboardType = KeyboardType.Phone,
+                    keyboardType = CustomKeyboardType.Phone,
                     isPassword = false,
                     leadingIcon = {
                         Icon(
@@ -98,13 +99,16 @@ fun LoginScreen(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                             .noRippleClickable {
-                                // navigate to register with phoneNumber and email
                                 navController.navigate(
                                     Screens.Register.withArgs(
                                         state.user.phoneNumber,
                                         state.user.email
                                     )
-                                )
+                                ) {
+                                    popUpTo(Screens.Login.route) {
+                                        inclusive = false
+                                    }
+                                }
                             },
                         text = stringResource(R.string.sign_up),
                         style = MaterialTheme.typography.body2,

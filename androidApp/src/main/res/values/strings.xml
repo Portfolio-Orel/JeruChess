@@ -87,6 +87,15 @@
     <string name="what_a_shame_to_see_you_go">What a shame to see you go!</string>
     <string name="hope_to_see_you_again_soon">Hope to see you again soon</string>
     <string name="thanks">Thanks</string>
+    <string name="male">Male</string>
+    <string name="female">Female</string>
+    <string name="none">None</string>
+    <string name="lets_get_to_know_better">Let\'s get to know better!</string>
+    <string name="gender">Gender</string>
+    <string name="date_of_birth">Date of birth</string>
+    <string name="default_date_of_birth">01011990</string>
+    <string name="placeholder_first_name">John</string>
+    <string name="placeholder_last_name">Smith</string>
     <!--    Screen Labels    -->
 
 

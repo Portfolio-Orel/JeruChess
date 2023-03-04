@@ -18,7 +18,7 @@ class SqlDelightUsersDataSource(
             id = user.id,
             firstName = user.firstName,
             lastName = user.lastName,
-            gender = user.gender,
+            gender = user.gender.name,
             email = user.email,
             phoneNumber = user.phoneNumber,
             playerNumber = user.playerNumber,

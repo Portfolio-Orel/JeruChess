@@ -18,7 +18,9 @@ import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignUpOptions
 import com.amplifyframework.auth.cognito.options.AuthFlowType
 import com.amplifyframework.core.AmplifyConfiguration
 import com.amplifyframework.kotlin.core.Amplify
+import com.orels.jeruchess.android.domain.AuthEvent
 import com.orels.jeruchess.android.domain.AuthInteractor
+import com.orels.jeruchess.android.domain.AuthState
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.core.util.toCommonFlow
@@ -27,38 +29,27 @@ import com.orels.jeruchess.main.domain.data.users.UsersDataSource
 import com.orels.jeruchess.main.domain.model.User
 import com.orels.jeruchess.utils.PasswordGenerator
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.util.*
 import javax.inject.Inject
-
-enum class AuthState {
-    LOGGED_IN,
-    LOGGED_OUT,
-    REGISTRATION_REQUIRED,
-    LOADING,
-    ERROR;
-
-    companion object {
-        fun fromString(value: String): AuthState {
-            return values().first { it.name == value }
-        }
-    }
-}
 
 class AuthInteractorImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val usersDataSource: UsersDataSource,
     private val usersClient: UsersClient,
 ) : AuthInteractor {
+
+    companion object {
+        var isConfigured: Boolean = false
+    }
+
     private val authStateDataStoreName: String
         get() = "auth_state_data_store"
 
     private val authStatePreferencesKey = stringPreferencesKey("auth_state")
 
     private val Context.authStateDataStore by preferencesDataStore(name = authStateDataStoreName)
-    companion object {
-        var isConfigured: Boolean = false
-    }
 
     private suspend fun setAuthState(authState: AuthState) {
         context.authStateDataStore.edit { preferences ->
@@ -79,29 +70,21 @@ class AuthInteractorImpl @Inject constructor(
         }
     }
 
-    override suspend fun login(email: String, password: String) {
-
-//        val result = auth.signInWithEmailAndPassword(email, password)
-//        if (!result.isSuccessful) {
-//            when (result.exception) {
-//                is FirebaseAuthInvalidUserException -> throw InvalidUserException
-//                is Exception -> throw result.exception!!
-//            }
-//        }
-    }
-
-    override suspend fun loginWithPhone(phoneNumber: String) {
+    private suspend fun loginWithPhone(phoneNumber: String) {
         try {
             val options = AWSCognitoAuthSignInOptions.builder()
                 .authFlowType(AuthFlowType.USER_PASSWORD_AUTH)
                 .build()
             Amplify.Auth.signIn()
+            userLoggedIn()
         } catch (error: AmplifyException) {
-            Log.e("MyAmplifyApp", "Could not initialize Amplify", error);
+            handleError(error)
+        } catch (error: Exception) {
+            // TODO
         }
     }
 
-    override suspend fun register(user: User) {
+    private suspend fun register(user: User) {
         val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(user.phoneNumber, "IL")
         val signUpOptions = AWSCognitoAuthSignUpOptions.builder()
             .userAttribute(AuthUserAttributeKey.phoneNumberVerified(), formattedPhoneNumber)
@@ -114,7 +97,7 @@ class AuthInteractorImpl @Inject constructor(
             .build()
 
         try {
-            val res = Amplify.Auth.signUp(
+            Amplify.Auth.signUp(
                 user.email,
                 PasswordGenerator.generateStrongPassword(),
                 signUpOptions
@@ -130,58 +113,16 @@ class AuthInteractorImpl @Inject constructor(
             user.token = token
             usersClient.createUser(user)
             usersDataSource.saveUser(user)
-        } catch (e: Exception) {
-            Log.e("MyAmplifyApp", "Could not initialize Amplify", e)
+            setAuthState(AuthState.CONFIRMATION_REQUIRED)
+        } catch (error: AmplifyException) {
+            handleError(error)
+        } catch (error: Exception) {
+            // TODO
         }
     }
 
-    suspend fun confirm() {
-        Amplify.Auth.confirmSignUp("orelsmail@gmail.com", "227314")
-    }
-
-    override suspend fun logout() {
-    }
-
-    override suspend fun isUserLoggedIn(): Boolean =
+    private suspend fun loginWithGoogle(activity: Activity) {
         try {
-            val authSession = Amplify.Auth.fetchAuthSession()
-            authSession.isSignedIn
-        } catch (e: Exception) {
-            false
-        }
-
-
-    override suspend fun isUserRegistered(userId: String): Boolean {
-        val user = usersClient.getUser(userId)
-        return user != null
-    }
-
-    override suspend fun saveUser(user: User) = usersDataSource.saveUser(user)
-
-    override suspend fun getCurrentUserEmail(): String {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getToken(): String =
-        (Amplify.Auth.fetchAuthSession() as AWSCognitoAuthSession).userPoolTokensResult.value?.accessToken
-            ?: ""
-
-    override suspend fun getUserId(): String = Amplify.Auth.getCurrentUser().userId
-
-
-    override suspend fun getUser(): User {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getUserFlow(): CommonFlow<User?> = usersDataSource.getUserFlow()
-    override suspend fun getAuthState(): CommonFlow<AuthState> = context.authStateDataStore.data.map {
-        AuthState.fromString(it[authStatePreferencesKey] ?: AuthState.LOGGED_OUT.name)
-    }.toCommonFlow()
-
-
-    override suspend fun loginWithGoogle(activity: Activity): User? {
-        return try {
-            Amplify.Auth.signOut()
             Amplify.Auth.signInWithSocialWebUI(
                 AuthProvider.google(),
                 activity
@@ -189,13 +130,34 @@ class AuthInteractorImpl @Inject constructor(
             Amplify.Auth.resendUserAttributeConfirmationCode(
                 AuthUserAttributeKey.email()
             )
-            return buildUser()
+            userLoggedIn()
         } catch (error: AmplifyException) {
-            when (error) {
-                is SignedInException -> buildUser()
-                else -> Log.e("MyAmplifyApp", "Could not initialize Amplify", error)
-            }
-            null
+            handleError(error)
+        } catch (error: Exception) {
+            // TODO
+        }
+    }
+
+    private suspend fun logout() {
+        Amplify.Auth.signOut()
+        usersDataSource.clearUser()
+        setAuthState(AuthState.LOGGED_OUT)
+    }
+
+    private suspend fun handleError(error: AmplifyException) {
+        when (error) {
+            is SignedInException -> userLoggedIn()
+            else -> Log.e("MyAmplifyApp", "Could not initialize Amplify", error)
+        }
+    }
+
+    private suspend fun userLoggedIn() {
+        val userId = Amplify.Auth.getCurrentUser().userId
+        if(isUserRegistered(userId)) {
+            setUser()
+            setAuthState(AuthState.LOGGED_IN)
+        } else {
+            setAuthState(AuthState.REGISTRATION_REQUIRED)
         }
     }
 
@@ -217,4 +179,35 @@ class AuthInteractorImpl @Inject constructor(
             token = token
         )
     }
+
+    override suspend fun onAuth(authEvent: AuthEvent) {
+        when(authEvent) {
+            is AuthEvent.LoginWithGoogle -> loginWithGoogle(authEvent.activity)
+            is AuthEvent.LoginWithPhone -> loginWithPhone(authEvent.phoneNumber)
+            is AuthEvent.Register -> register(authEvent.user)
+            is AuthEvent.Logout -> logout()
+        }
+    }
+
+    override suspend fun isUserLoggedIn(): Boolean =
+        try {
+            context.authStateDataStore.data.first()[authStatePreferencesKey] == AuthState.LOGGED_IN.name
+        } catch (e: Exception) {
+            false
+        }
+
+
+    override suspend fun isUserRegistered(userId: String): Boolean =
+        try {
+            usersClient.getUser(userId) != null
+        } catch (e: Exception) {
+            false
+        }
+    override suspend fun saveUser(user: User) = usersDataSource.saveUser(user)
+    override suspend fun getUser(): User? = usersDataSource.getUser()
+    override suspend fun getAuthState(): CommonFlow<AuthState> = context.authStateDataStore.data.map {
+        AuthState.fromString(it[authStatePreferencesKey] ?: AuthState.LOGGED_OUT.name)
+    }.toCommonFlow()
+
+
 }

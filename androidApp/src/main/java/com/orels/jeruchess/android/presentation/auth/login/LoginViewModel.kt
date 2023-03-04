@@ -6,8 +6,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orels.jeruchess.android.domain.AuthEvent
 import com.orels.jeruchess.android.domain.AuthInteractor
-import com.orels.jeruchess.main.domain.model.User
+import com.orels.jeruchess.android.domain.AuthState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -19,36 +20,36 @@ class LoginViewModel @Inject constructor(
 
     var state by mutableStateOf(LoginState())
 
+    init {
+        observeAuthState()
+    }
+
+    private fun observeAuthState() {
+        viewModelScope.launch {
+            authInteractor.getAuthState()
+                .collect {
+                    state = state.copy(authState = it)
+                }
+        }
+    }
+
     private fun loginWithGoogle(activity: Activity) {
         viewModelScope.launch {
-            val user = authInteractor.loginWithGoogle(activity)
-            if(user != null && authInteractor.isUserRegistered(user.id)) {
-                authInteractor.saveUser(user)
-            } else {
-                state = state.copy(authState = AuthState.REGISTRATION_REQUIRED)
-            }
+            authInteractor.onAuth(AuthEvent.LoginWithGoogle(activity))
         }
     }
 
     private fun loginWithPhone(phoneNumber: String) {
         state = state.copy(isLoadingLogin = true)
         viewModelScope.launch {
-            if (phoneNumber.length < 8) {
-                authInteractor.register(
-                    User(
-                        phoneNumber = phoneNumber,
-                    )
-                )
-            } else {
-                authInteractor.loginWithPhone(phoneNumber)
-            }
+            authInteractor.onAuth(AuthEvent.LoginWithPhone(phoneNumber))
             state = state.copy(isLoadingLogin = false)
         }
     }
 
     private fun logout() {
         viewModelScope.launch {
-            authInteractor.logout()
+            authInteractor.onAuth(AuthEvent.Logout)
         }
     }
 

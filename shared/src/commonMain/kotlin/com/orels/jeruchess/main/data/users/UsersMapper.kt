@@ -1,5 +1,6 @@
 package com.orels.jeruchess.main.data.users
 
+import com.orels.jeruchess.main.domain.model.Gender
 import com.orels.jeruchess.main.domain.model.User
 import database.UserEntity
 
@@ -8,7 +9,7 @@ fun UserEntity.toUser() = User(
     firstName = firstName,
     lastName = lastName,
     email = email,
-    gender = gender,
+    gender = Gender.fromString(gender),
     phoneNumber = phoneNumber,
     playerNumber = playerNumber,
     dateOfBirth = dateOfBirth

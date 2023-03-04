@@ -10,7 +10,7 @@ enum class Screens(val route: String, @StringRes val label: Int = R.string.empty
     ForgotPassword("forgotPassword");
 
     fun withArgs(vararg args: String?): String {
-        return buildString {
+        val newRoute = buildString {
             append(route)
             args.forEach { value ->
                 if (value != null && value.isNotEmpty()) {
@@ -18,6 +18,19 @@ enum class Screens(val route: String, @StringRes val label: Int = R.string.empty
                 }
             }
         }
+        return newRoute
+    }
+
+    fun withArgsForRoute(vararg args: String?): String {
+        val newRoute = buildString {
+            append(route)
+            args.forEach { value ->
+                if (value != null && value.isNotEmpty()) {
+                    append("/{$value}")
+                }
+            }
+        }
+        return newRoute
     }
 }
 

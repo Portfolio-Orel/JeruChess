@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -35,84 +36,121 @@ fun JeruChess(
     val navHostController = rememberNavController()
     val navController = navHostController as NavController
     val state = viewModel.state
-    val context = LocalContext.current
 
     if (state.isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            Loading(size = 8.dp, color = MaterialTheme.colors.onBackground)
-        }
+        LoadingContent()
     } else {
         if (!state.isAuthenticated) {
-            LoginScreen(navController = navController)
+            UnAuthenticatedContent(
+                navController = navController,
+                navHostController = navHostController
+            )
         } else {
-            CustomScaffold(
+            AuthenticatedContent(
+                navController = navController,
                 navHostController = navHostController,
-                topBar = { /*TODO*/ },
-                bottomBar = {
-                    BottomBar(navHostController = navHostController,
-                        onNavigationClick = { viewModel.navigateToClub(context = context) })
-                }
-            ) {
-                NavHost(
-                    modifier = Modifier.padding(
-                        top = it.calculateTopPadding(),
-                        bottom = it.calculateBottomPadding(),
-                        end = it.calculateEndPadding(LayoutDirection.Rtl),
-                        start = it.calculateStartPadding(LayoutDirection.Rtl)
-                    ),
-                    navController = navHostController,
-                    startDestination = Screens.Main.route
-                ) {
-                    composable(route = Screens.Login.route) {
-                        LoginScreen(navController = navController)
-                    }
-                    composable(route = Screens.ForgotPassword.route) {
-                        ForgotPasswordScreen(navController = navController)
-                    }
-                    composable(
-                        route = Screens.Register.withArgs(
-                            PRE_INSERTED_PHONE_NUMBER,
-                            PRE_INSERTED_EMAIL
-                        ),
-                        arguments = listOf(
-                            navArgument(PRE_INSERTED_PHONE_NUMBER) {
-                                defaultValue = ""
-                            },
-                            navArgument(PRE_INSERTED_EMAIL) {
-                                defaultValue = ""
-                            },
-                        )
-                    ) {
-                        val preInsertedPhoneNumber =
-                            it.arguments?.getString(
-                                PRE_INSERTED_PHONE_NUMBER
-                            ) ?: ""
-                        val preInsertedEmail =
-                            it.arguments?.getString(
-                                PRE_INSERTED_EMAIL
-                            ) ?: ""
-                        RegisterScreen(
-                            navController = navController,
-                            preInsertedPhoneNumber = preInsertedPhoneNumber,
-                            preInsertedEmail = preInsertedEmail
-                        )
-                    }
-                    composable(route = Screens.Main.route) {
-                        val mainViewModel = hiltViewModel<AndroidMainViewModel>()
-                        val mainState by mainViewModel.state.collectAsState()
-                        MainScreen(
-                            navController = navController,
-                            state = mainState,
-                            viewModel = mainViewModel
-                        )
-                    }
+                viewModel = viewModel
+            )
+        }
+    }
+}
 
-                }
+@Composable
+fun LoadingContent() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Loading(size = 8.dp, color = MaterialTheme.colors.onBackground)
+    }
+}
+
+@Composable
+fun AuthenticatedContent(
+    navController: NavController,
+    navHostController: NavHostController,
+    viewModel: JeruChessViewModel,
+) {
+    val context = LocalContext.current
+
+    CustomScaffold(
+        navHostController = navHostController,
+        topBar = { /*TODO*/ },
+        bottomBar = {
+            BottomBar(navHostController = navHostController,
+                onNavigationClick = { viewModel.navigateToClub(context = context) })
+        }
+    ) {
+        NavHost(
+            modifier = Modifier.padding(
+                top = it.calculateTopPadding(),
+                bottom = it.calculateBottomPadding(),
+                end = it.calculateEndPadding(LayoutDirection.Rtl),
+                start = it.calculateStartPadding(LayoutDirection.Rtl)
+            ),
+            navController = navHostController,
+            startDestination = Screens.Main.route
+        ) {
+            composable(route = Screens.Login.route) {
+                LoginScreen(navController = navController)
             }
+            composable(route = Screens.Main.route) {
+                val mainViewModel = hiltViewModel<AndroidMainViewModel>()
+                val mainState by mainViewModel.state.collectAsState()
+                MainScreen(
+                    navController = navController,
+                    state = mainState,
+                    viewModel = mainViewModel
+                )
+            }
+
+        }
+    }
+}
+
+@Composable
+fun UnAuthenticatedContent(
+    navController: NavController,
+    navHostController: NavHostController
+) {
+    NavHost(
+        navController = navHostController,
+        startDestination = Screens.Login.route
+    ) {
+        composable(route = Screens.Login.route) {
+            LoginScreen(navController = navController)
+        }
+        composable(
+            route = Screens.Register.withArgsForRoute(
+                PRE_INSERTED_PHONE_NUMBER,
+                PRE_INSERTED_EMAIL
+            ),
+            arguments = listOf(
+                navArgument(PRE_INSERTED_PHONE_NUMBER) {
+                    defaultValue = ""
+                },
+                navArgument(PRE_INSERTED_EMAIL) {
+                    defaultValue = ""
+                },
+            )
+        ) { navBackStackEntry ->
+            val preInsertedPhoneNumber =
+                navBackStackEntry.arguments?.getString(
+                    PRE_INSERTED_PHONE_NUMBER
+                ) ?: ""
+            val preInsertedEmail =
+                navBackStackEntry.arguments?.getString(
+                    PRE_INSERTED_EMAIL
+                ) ?: ""
+            RegisterScreen(
+                navController = navController,
+                preInsertedPhoneNumber = preInsertedPhoneNumber,
+                preInsertedEmail = preInsertedEmail
+            )
+        }
+        composable(route = Screens.ForgotPassword.route) {
+            ForgotPasswordScreen(navController = navController)
         }
     }
 }

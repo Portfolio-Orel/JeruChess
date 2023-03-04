@@ -5,18 +5,18 @@ import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -30,24 +30,30 @@ fun Input(
     initialText: String = "",
     minLines: Int = 1,
     maxLines: Int = 1,
+    maxCharacters: Int? = null,
     isError: Boolean = false,
     isPassword: Boolean = false,
     shouldFocus: Boolean = false,
-    keyboardType: KeyboardType = KeyboardType.Text,
+    keyboardType: CustomKeyboardType = CustomKeyboardType.Text,
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = { },
     onTextChange: (String) -> Unit = {},
-    isDisabled: Boolean = false
+    isDisabled: Boolean = false,
+    formatter: (String) -> String = { it }
 ) {
-    val value = remember { mutableStateOf(initialText) }
+    var textFieldValueState by remember { mutableStateOf(TextFieldValue(initialText)) }
+    var previousText by remember { mutableStateOf(initialText) }
+
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
     val lineHeight = 40
     val focusRequester = FocusRequester()
 
     var inputModifier = if (shouldFocus) Modifier.focusRequester(focusRequester) else Modifier
+    val maxWidth = if (maxCharacters != null) (maxCharacters * 75).dp else null
 
     inputModifier =
-        if (maxLines == 1) inputModifier else inputModifier.height((lineHeight * minLines).dp)
+        if (maxLines == 1) inputModifier else inputModifier.requiredHeight((lineHeight * minLines).dp)
+    inputModifier = if (maxWidth != null) inputModifier.requiredWidth(maxWidth) else inputModifier
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -61,21 +67,28 @@ fun Input(
                 modifier = inputModifier
                     .fillMaxWidth()
                     .focusable(enabled = shouldFocus),
-                value = value.value,
+                value = textFieldValueState,
                 onValueChange = {
-                    value.value = it
-                    onTextChange(it)
+                    var newValue = it.text
+                    if (maxCharacters != null) {
+                        newValue = it.text.takeLast(maxCharacters)
+                    }
+                    textFieldValueState =
+                        keyboardType.buildTextFieldValue(newValue, previousText, formatter)
+                    newValue = formatter(newValue)
+                    previousText = newValue
+                    onTextChange(newValue)
                 },
                 placeholder = {
                     Text(
-                        text = placeholder,
+                        text = formatter(placeholder),
                         color = MaterialTheme.colors.onSurface.copy(alpha = 0.4f)
                     )
                 },
                 singleLine = maxLines == 1,
                 visualTransformation = if (isPassword && !passwordVisible.value) PasswordVisualTransformation() else VisualTransformation.None,
                 keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions(
-                    keyboardType = keyboardType
+                    keyboardType = keyboardType.type
                 ),
                 trailingIcon = {
                     if (isPassword) {
@@ -108,4 +121,36 @@ private fun PasswordIcon(
     IconButton(onClick = onClick) {
         Icon(painter = image, description)
     }
+}
+
+@Suppress("unused")
+enum class CustomKeyboardType(
+    val type: KeyboardType,
+    val buildTextFieldValue: (newValue: String, previousValue: String, formatter: (String) -> String) -> TextFieldValue = { newValue, _, _ ->
+        TextFieldValue(
+            newValue,
+            TextRange(newValue.length)
+        )
+    }
+) {
+    Ascii(type = KeyboardType.Ascii),
+    Number(type = KeyboardType.Number),
+    NumberPassword(type = KeyboardType.NumberPassword),
+    Uri(type = KeyboardType.Uri),
+    Text(type = KeyboardType.Text),
+    Password(type = KeyboardType.Password),
+    Email(type = KeyboardType.Email),
+    Phone(type = KeyboardType.Phone),
+    Decimal(type = KeyboardType.Decimal),
+    Date(
+        type = KeyboardType.Phone,
+        buildTextFieldValue = { newValue, previousValue, formatter ->
+            val cursorPosition =
+                if (newValue.length < previousValue.length) { // It's a delete
+                    if (newValue.takeLast(1) == "/") newValue.length - 1 else newValue.length
+                } else {
+                    formatter(newValue).length
+                }
+            TextFieldValue(formatter(newValue), TextRange(cursorPosition))
+        });
 }

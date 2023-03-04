@@ -6,8 +6,11 @@ import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
@@ -16,28 +19,36 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.presentation.components.ActionButton
 import com.orels.jeruchess.android.presentation.components.BackPressHandler
+import com.orels.jeruchess.android.presentation.components.CustomKeyboardType
 import com.orels.jeruchess.android.presentation.components.Input
+import com.orels.jeruchess.main.domain.model.Gender
+import com.orels.jeruchess.utils.Formatters
 import com.orels.jeruchess.utils.Validators
+import java.util.*
 
 private enum class Stage {
-    NAME, EMAIL_NUMBER, CONFIRMATION, DONE, ERROR
+    BASIC_INFORMATION, EMAIL_NUMBER, CONFIRMATION, DONE, ERROR
 }
 
 // this will show the stages order, not as a string
 private val registrationProcess: List<Stage> = listOf(
-    Stage.NAME,
+    Stage.BASIC_INFORMATION,
     Stage.EMAIL_NUMBER,
     Stage.CONFIRMATION,
     Stage.DONE
@@ -64,19 +75,26 @@ private fun Stage.previous(): Stage {
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    preInsertedPhoneNumber: String,
-    preInsertedEmail: String
+    preInsertedPhoneNumber: String = "",
+    preInsertedEmail: String = "",
+    viewModel: RegisterViewModel = hiltViewModel()
 ) {
-    var firstName by remember { mutableStateOf("") }
-    var lastName by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf(preInsertedEmail) }
-    var phoneNumber by remember { mutableStateOf(preInsertedPhoneNumber) }
     var backPressed by remember { mutableStateOf(false) }
-    val stage = remember { mutableStateOf(Stage.NAME) }
+
+    val state = viewModel.state
+    val stage = remember { mutableStateOf(Stage.BASIC_INFORMATION) }
+
+    LaunchedEffect(key1 = preInsertedEmail) {
+        viewModel.onEvent(RegisterEvent.SetEmail(preInsertedEmail))
+    }
+
+    LaunchedEffect(key1 = preInsertedPhoneNumber) {
+        viewModel.onEvent(RegisterEvent.SetPhoneNumber(preInsertedPhoneNumber))
+    }
 
     BackPressHandler {
         backPressed = true
-        if (stage.value != (registrationProcess.firstOrNull() ?: Stage.NAME)) {
+        if (stage.value != (registrationProcess.firstOrNull() ?: Stage.BASIC_INFORMATION)) {
             stage.value = stage.value.previous()
         } else {
             navController.popBackStack()
@@ -84,14 +102,18 @@ fun RegisterScreen(
     }
 
     AnimateContent(
-        shouldShow = stage.value == Stage.NAME,
+        shouldShow = stage.value == Stage.BASIC_INFORMATION,
     ) {
-        GetName(
-            firstName = firstName,
-            lastName = lastName,
-            onNameEntered = { first, last ->
-                firstName = first
-                lastName = last
+        GetBasicInformation(
+            gender = state.gender,
+            firstName = state.firstName,
+            lastName = state.lastName,
+            dateOfBirth = state.dateOfBirth,
+            onNameEntered = { firstName, lastName, gender, dateOfBirth ->
+                viewModel.onEvent(RegisterEvent.SetFirstName(firstName))
+                viewModel.onEvent(RegisterEvent.SetLastName(lastName))
+                viewModel.onEvent(RegisterEvent.SetGender(gender))
+                viewModel.onEvent(RegisterEvent.SetDateOfBirth(dateOfBirth))
                 stage.value = stage.value.next()
             }
         )
@@ -100,13 +122,13 @@ fun RegisterScreen(
         shouldShow = stage.value == Stage.EMAIL_NUMBER,
     ) {
         GetEmailAndPhoneNumber(
-            email = email,
-            phoneNumber = phoneNumber,
+            email = state.email,
+            phoneNumber = state.phoneNumber,
             isEmailDisabled = preInsertedEmail.isNotBlank(),
             isPhoneNumberDisabled = preInsertedPhoneNumber.isNotBlank(),
             onDetailsEntered = { mail, number ->
-                email = mail
-                phoneNumber = number
+                viewModel.onEvent(RegisterEvent.SetEmail(mail))
+                viewModel.onEvent(RegisterEvent.SetPhoneNumber(number))
                 stage.value = stage.value.next()
             },
             validateEmail = { Validators.isEmailValid(it) },
@@ -122,15 +144,26 @@ fun RegisterScreen(
 }
 
 @Composable
-fun GetName(
-    onNameEntered: (firstName: String, lastName: String) -> Unit,
+fun GetBasicInformation(
+    onNameEntered: (firstName: String, lastName: String, gender: Gender, dateOfBirth: Long) -> Unit,
+    gender: Gender? = null,
+    dateOfBirth: Long = 0L,
     firstName: String = "",
-    lastName: String = ""
+    lastName: String = "",
 ) {
-    val firstNameValue = remember { mutableStateOf(firstName) }
-    val firstNameError = remember { mutableStateOf(false) }
-    val lastNameValue = remember { mutableStateOf(lastName) }
-    val lastNameError = remember { mutableStateOf(false) }
+    var firstNameValue by remember { mutableStateOf(firstName) }
+    var firstNameError by remember { mutableStateOf(false) }
+
+    var lastNameValue by remember { mutableStateOf(lastName) }
+    var lastNameError by remember { mutableStateOf(false) }
+
+    var genderValue by remember { mutableStateOf(gender) }
+
+    var dateOfBirthValue by remember { mutableStateOf(dateOfBirth) }
+    var dateOfBirthError by remember { mutableStateOf(false) }
+
+    var formattedDateOfBirth = if (dateOfBirthValue != 0L) Date(dateOfBirthValue).toString() else ""
+    formattedDateOfBirth = Formatters.toDateString(formattedDateOfBirth)
 
     Column(
         modifier = Modifier
@@ -141,43 +174,75 @@ fun GetName(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
     ) {
         Text(
-            text = stringResource(R.string.what_is_your_name),
+            text = stringResource(R.string.lets_get_to_know_better),
             style = MaterialTheme.typography.h5,
             color = MaterialTheme.colors.onBackground
         )
         Input(
             title = stringResource(R.string.first_name),
+            placeholder = stringResource(R.string.placeholder_first_name),
             minLines = 1,
             maxLines = 1,
-            isError = firstNameError.value,
-            initialText = firstNameValue.value,
+            isError = firstNameError,
+            initialText = firstNameValue,
             isPassword = false,
             onTextChange = {
-                firstNameValue.value = it
+                firstNameValue = it
             }
         )
         Input(
             title = stringResource(R.string.last_name),
+            placeholder = stringResource(R.string.placeholder_last_name),
             minLines = 1,
             maxLines = 1,
-            isError = lastNameError.value,
-            initialText = lastNameValue.value,
+            isError = lastNameError,
+            initialText = lastNameValue,
             isPassword = false,
             onTextChange = {
-                lastNameValue.value = it
+                lastNameValue = it
             }
         )
+        Input(
+            title = stringResource(R.string.date_of_birth),
+            minLines = 1,
+            maxLines = 1,
+            isError = dateOfBirthError,
+            initialText = if (dateOfBirthValue != 0L) formattedDateOfBirth else stringResource(R.string.empty_string),
+            placeholder = Formatters.toDateString(stringResource(R.string.default_date_of_birth)),
+            isPassword = false,
+            keyboardType = CustomKeyboardType.Date,
+            onTextChange = {
+                lastNameValue = it
+            },
+            formatter = { Formatters.toDateString(it) },
+        )
+        SubTitle(text = stringResource(R.string.gender))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            Gender.values().forEach { gender ->
+                GenderContainer(
+                    gender = gender,
+                    selected = genderValue == gender,
+                    onClick = {
+                        genderValue = it
+                    },
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
-                lastNameError.value = false
-                firstNameError.value = false
+                lastNameError = false
+                firstNameError = false
 
-                if (firstNameValue.value.isNotBlank() && lastNameValue.value.isNotBlank()) {
-                    onNameEntered(firstNameValue.value, lastNameValue.value)
+                if (firstNameValue.isNotBlank() && lastNameValue.isNotBlank() && dateOfBirthValue != 0L && genderValue != null) {
+                    onNameEntered(firstNameValue, lastNameValue, genderValue!!, dateOfBirthValue)
                 } else {
-                    firstNameError.value = firstNameValue.value.isBlank()
-                    lastNameError.value = lastNameValue.value.isBlank()
+                    firstNameError = firstNameValue.isBlank()
+                    lastNameError = lastNameValue.isBlank()
+                    dateOfBirthError = dateOfBirthValue == 0L
                 }
             }, text = stringResource(R.string.next)
         )
@@ -209,8 +274,8 @@ fun GetEmailAndPhoneNumber(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
     ) {
         Text(
-            text = stringResource(R.string.what_is_your_email),
-            style = MaterialTheme.typography.h5,
+            text = stringResource(R.string.lets_get_to_know_better),
+            style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onBackground
         )
         Input(
@@ -343,5 +408,79 @@ fun AnimateContent(
         )
     ) {
         content()
+    }
+}
+
+@Composable
+fun SubTitle(
+    text: String,
+) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = text,
+        style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Normal),
+        color = MaterialTheme.colors.onBackground,
+        textAlign = TextAlign.Start
+    )
+}
+
+@Composable
+fun GenderContainer(
+    gender: Gender,
+    selected: Boolean,
+    onClick: (Gender) -> Unit,
+) {
+    val drawable = when (gender) {
+        Gender.Male -> R.drawable.male
+        Gender.Female -> R.drawable.female
+        Gender.None -> R.drawable.sex_none
+    }
+    val contentDescription = when (gender) {
+        Gender.Male -> R.string.male
+        Gender.Female -> R.string.female
+        Gender.None -> R.string.none
+    }
+
+    val selectedColors = listOf(
+        Color(MaterialTheme.colors.primary.copy(alpha = 0.9f).value),
+        Color(MaterialTheme.colors.primary.copy(alpha = 0.85f).value),
+        Color(MaterialTheme.colors.primary.copy(alpha = 0.8f).value),
+    )
+    val unselectedColors = listOf(
+        Color(MaterialTheme.colors.onBackground.copy(alpha = 0.3f).value),
+        Color(MaterialTheme.colors.onBackground.copy(alpha = 0.3f).value),
+        Color(MaterialTheme.colors.onBackground.copy(alpha = 0.3f).value),
+    )
+    val colors = if (selected) selectedColors else unselectedColors
+
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = colors,
+                        startY = 0f,
+                        endY = Float.POSITIVE_INFINITY,
+                    ),
+                    shape = RoundedCornerShape(15.dp)
+                )
+                .padding(6.dp)
+                .clickable { onClick(gender) }
+        ) {
+            Image(
+                modifier = Modifier.size(64.dp),
+                painter = painterResource(id = drawable),
+                contentDescription = stringResource(contentDescription),
+            )
+        }
+        Text(
+            text = if (selected) stringResource(id = contentDescription) else stringResource(id = R.string.empty_string),
+            style = MaterialTheme.typography.body1,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 8.dp)
+        )
     }
 }

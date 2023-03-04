@@ -1,5 +1,6 @@
 package com.orels.jeruchess.main.data.users
 
+import com.orels.jeruchess.main.domain.model.Gender
 import com.orels.jeruchess.main.domain.model.User
 import kotlinx.serialization.SerialName
 
@@ -19,7 +20,7 @@ data class UserDto(
         firstName = firstName,
         lastName = lastName,
         email = email,
-        gender = gender,
+        gender = Gender.fromString(gender),
         phoneNumber = phoneNumber,
         playerNumber = playerNumber,
         dateOfBirth = dateOfBirth,
@@ -31,7 +32,7 @@ fun User.toUserDto(): UserDto = UserDto(
     firstName = firstName,
     lastName = lastName,
     email = email,
-    gender = gender,
+    gender = gender.name,
     phoneNumber = phoneNumber,
     playerNumber = playerNumber,
     dateOfBirth = dateOfBirth,
