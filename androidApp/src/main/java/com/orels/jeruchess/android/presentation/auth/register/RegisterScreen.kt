@@ -33,10 +33,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
+import com.orels.jeruchess.android.core.presentation.Screens
 import com.orels.jeruchess.android.presentation.components.ActionButton
 import com.orels.jeruchess.android.presentation.components.BackPressHandler
 import com.orels.jeruchess.android.presentation.components.CustomKeyboardType
 import com.orels.jeruchess.android.presentation.components.Input
+import com.orels.jeruchess.android.presentation.util.isDateValid
+import com.orels.jeruchess.android.presentation.util.registerString
+import com.orels.jeruchess.android.presentation.util.toRegisterDate
+import com.orels.jeruchess.android.presentation.util.toRegisterDateLong
 import com.orels.jeruchess.main.domain.model.Gender
 import com.orels.jeruchess.utils.Formatters
 import com.orels.jeruchess.utils.Validators
@@ -108,7 +113,7 @@ fun RegisterScreen(
             gender = state.gender,
             firstName = state.firstName,
             lastName = state.lastName,
-            dateOfBirth = state.dateOfBirth,
+            dateOfBirth = Date(state.dateOfBirth).toString(),
             onNameEntered = { firstName, lastName, gender, dateOfBirth ->
                 viewModel.onEvent(RegisterEvent.SetFirstName(firstName))
                 viewModel.onEvent(RegisterEvent.SetLastName(lastName))
@@ -141,13 +146,24 @@ fun RegisterScreen(
             stage.value = stage.value.next()
         }
     }
+
+    AnimateContent(shouldShow = stage.value == Stage.DONE) {
+        DoneContent(
+            onDone = {
+                navController.navigate(Screens.Main.route) {
+                    popUpTo(Screens.Register.route) { inclusive = true }
+                }
+            },
+            isLoading = state.isLoginLoading
+        )
+    }
 }
 
 @Composable
 fun GetBasicInformation(
     onNameEntered: (firstName: String, lastName: String, gender: Gender, dateOfBirth: Long) -> Unit,
     gender: Gender? = null,
-    dateOfBirth: Long = 0L,
+    dateOfBirth: String = "",
     firstName: String = "",
     lastName: String = "",
 ) {
@@ -159,11 +175,13 @@ fun GetBasicInformation(
 
     var genderValue by remember { mutableStateOf(gender) }
 
-    var dateOfBirthValue by remember { mutableStateOf(dateOfBirth) }
+    var dateOfBirthValue by remember {
+        mutableStateOf(
+            dateOfBirth.toRegisterDate()?.registerString ?: ""
+        )
+    }
     var dateOfBirthError by remember { mutableStateOf(false) }
 
-    var formattedDateOfBirth = if (dateOfBirthValue != 0L) Date(dateOfBirthValue).toString() else ""
-    formattedDateOfBirth = Formatters.toDateString(formattedDateOfBirth)
 
     Column(
         modifier = Modifier
@@ -174,8 +192,8 @@ fun GetBasicInformation(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
     ) {
         Text(
-            text = stringResource(R.string.lets_get_to_know_better),
-            style = MaterialTheme.typography.h5,
+            text = stringResource(R.string.lets_get_to_know),
+            style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onBackground
         )
         Input(
@@ -207,12 +225,12 @@ fun GetBasicInformation(
             minLines = 1,
             maxLines = 1,
             isError = dateOfBirthError,
-            initialText = if (dateOfBirthValue != 0L) formattedDateOfBirth else stringResource(R.string.empty_string),
+            initialText = Formatters.toDateString(dateOfBirthValue),
             placeholder = Formatters.toDateString(stringResource(R.string.default_date_of_birth)),
             isPassword = false,
             keyboardType = CustomKeyboardType.Date,
             onTextChange = {
-                lastNameValue = it
+                dateOfBirthValue = it
             },
             formatter = { Formatters.toDateString(it) },
         )
@@ -236,13 +254,17 @@ fun GetBasicInformation(
             onClick = {
                 lastNameError = false
                 firstNameError = false
-
-                if (firstNameValue.isNotBlank() && lastNameValue.isNotBlank() && dateOfBirthValue != 0L && genderValue != null) {
-                    onNameEntered(firstNameValue, lastNameValue, genderValue!!, dateOfBirthValue)
+                if (firstNameValue.isNotBlank() && lastNameValue.isNotBlank() && dateOfBirthValue.isDateValid() && genderValue != null) {
+                    onNameEntered(
+                        firstNameValue,
+                        lastNameValue,
+                        genderValue!!,
+                        dateOfBirthValue.toRegisterDateLong()
+                    )
                 } else {
                     firstNameError = firstNameValue.isBlank()
                     lastNameError = lastNameValue.isBlank()
-                    dateOfBirthError = dateOfBirthValue == 0L
+                    dateOfBirthError = dateOfBirthValue.isBlank()
                 }
             }, text = stringResource(R.string.next)
         )
@@ -274,7 +296,7 @@ fun GetEmailAndPhoneNumber(
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.Top)
     ) {
         Text(
-            text = stringResource(R.string.lets_get_to_know_better),
+            text = stringResource(R.string.some_login_details),
             style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onBackground
         )
@@ -339,7 +361,16 @@ fun ConfirmationCodeDialog(
     val inputSize = (screenWidth - spaceBetweenInputs * (codeInputs * 2)) / codeInputs
     val textFieldColors = TextFieldDefaults.outlinedTextFieldColors(cursorColor = Color.Transparent)
 
-    Column {
+    Column(
+        modifier = Modifier.padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.Top),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.insert_sms_or_mail_code),
+            style = MaterialTheme.typography.h4,
+            color = MaterialTheme.colors.onBackground
+        )
         Row(horizontalArrangement = Arrangement.Center) {
             for (i in 0 until codeInputs) {
                 OutlinedTextField(
@@ -481,6 +512,44 @@ fun GenderContainer(
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp)
+        )
+    }
+}
+
+
+@Composable
+fun DoneContent(onDone: () -> Unit, isLoading: Boolean) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 16.dp)
+            .background(MaterialTheme.colors.background),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Text(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp),
+            text = stringResource(R.string.done_exclamation),
+            style = MaterialTheme.typography.h4,
+            fontWeight = FontWeight.Bold,
+        )
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = stringResource(R.string.your_account_was_created_exclamation),
+            style = MaterialTheme.typography.body1,
+            fontWeight = FontWeight.Thin,
+        )
+        ActionButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 16.dp),
+            onClick = { onDone() },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = MaterialTheme.colors.onBackground,
+                contentColor = MaterialTheme.colors.background,
+            ),
+            text = stringResource(R.string.lets_go),
+            isLoading = isLoading,
         )
     }
 }

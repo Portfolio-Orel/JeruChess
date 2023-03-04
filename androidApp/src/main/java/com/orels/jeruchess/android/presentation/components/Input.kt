@@ -41,8 +41,8 @@ fun Input(
     isDisabled: Boolean = false,
     formatter: (String) -> String = { it }
 ) {
-    var textFieldValueState by remember { mutableStateOf(TextFieldValue(initialText)) }
-    var previousText by remember { mutableStateOf(initialText) }
+    var textFieldValueState = remember { mutableStateOf(TextFieldValue(initialText)) }
+    var previousText = remember { mutableStateOf(initialText) }
 
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
     val lineHeight = 40
@@ -67,16 +67,16 @@ fun Input(
                 modifier = inputModifier
                     .fillMaxWidth()
                     .focusable(enabled = shouldFocus),
-                value = textFieldValueState,
+                value = textFieldValueState.value,
                 onValueChange = {
                     var newValue = it.text
                     if (maxCharacters != null) {
                         newValue = it.text.takeLast(maxCharacters)
                     }
-                    textFieldValueState =
-                        keyboardType.buildTextFieldValue(newValue, previousText, formatter)
+                    textFieldValueState.value =
+                        keyboardType.buildTextFieldValue(newValue, previousText.value, formatter)
                     newValue = formatter(newValue)
-                    previousText = newValue
+                    previousText.value = newValue
                     onTextChange(newValue)
                 },
                 placeholder = {

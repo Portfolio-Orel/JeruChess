@@ -34,6 +34,7 @@ kotlin {
                 implementation(Deps.kotlinDateTime)
                 implementation(Deps.gitLiveAuth)
                 implementation(Deps.gitLiveFirestore)
+                implementation(Deps.kmmDates)
                 implementation(kotlin("script-runtime"))
             }
         }

@@ -76,6 +76,9 @@ object Deps {
     const val protoDataStore = "androidx.datastore:datastore:1.0.0"
     const val protoDataStorePreferences = "androidx.datastore:datastore-preferences:1.0.0"
 
+    // KMM Dates
+    const val kmmDates = "org.jetbrains.kotlinx:kotlinx-datetime:0.4.0"
+
     // AWS
     const val desugarJdkLibs = "com.android.tools:desugar_jdk_libs:1.1.5"
     const val amplify = "com.amplifyframework:core-kotlin:2.2.0"

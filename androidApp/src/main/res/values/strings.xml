@@ -6,7 +6,7 @@
     <string name="show_password">Show Password</string>
     <string name="username">Username</string>
     <string name="password">Password</string>
-    <string name="email">email</string>
+    <string name="email">Email</string>
     <string name="password_icon">Password icon</string>
     <string name="empty_string" />
     <string name="did_forget_password">Forgot password?</string>
@@ -18,6 +18,7 @@
     <string name="change_password">Change password</string>
     <string name="error_limit_exceeded_operation">You tried too many times.. Try again later</string>
     <string name="insert_email_code">Insert the code you received in the mail</string>
+    <string name="insert_sms_or_mail_code">Insert the code you received in an sms/email</string>
     <string name="confirmation_code">Confirmation code</string>
     <string name="what_is_your_name">What\'s your name?</string>
     <string name="first_name">First name</string>
@@ -90,12 +91,14 @@
     <string name="male">Male</string>
     <string name="female">Female</string>
     <string name="none">None</string>
-    <string name="lets_get_to_know_better">Let\'s get to know better!</string>
+    <string name="lets_get_to_know">Let\'s get to know!</string>
     <string name="gender">Gender</string>
     <string name="date_of_birth">Date of birth</string>
-    <string name="default_date_of_birth">01011990</string>
+    <string name="default_date_of_birth">21/01/1990</string>
     <string name="placeholder_first_name">John</string>
     <string name="placeholder_last_name">Smith</string>
+    <string name="some_login_details">Some login details</string>
+    <string name="your_account_was_created_exclamation">Your account was created!</string>
     <!--    Screen Labels    -->
 
 

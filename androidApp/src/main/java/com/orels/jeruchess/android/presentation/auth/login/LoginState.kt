@@ -6,8 +6,8 @@ import com.orels.jeruchess.main.domain.model.User
 data class LoginState(
     val user: User = User(
         id = "",
-        phoneNumber = "0543056286",
-        email = "orelsmail@gmail.com"
+        phoneNumber = "",
+        email = ""
     ),
     val authState: AuthState = AuthState.LOGGED_OUT,
     val isLoading: Boolean = false,

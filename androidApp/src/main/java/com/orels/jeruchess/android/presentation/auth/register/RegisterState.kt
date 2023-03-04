@@ -10,5 +10,8 @@ data class RegisterState(
     val gender: Gender = Gender.None,
     val phoneNumber: String = "",
     val playerNumber: String = "", // TODO
-    val dateOfBirth: Long = 0L, // TODO
+    val dateOfBirth: Long = 0L,
+
+    val isLoginLoading: Boolean = false,
+
 )

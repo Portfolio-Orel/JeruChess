@@ -1,9 +1,16 @@
 package com.orels.jeruchess.utils
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+
 class Formatters {
     companion object {
         private const val MAX_DAY = 31
         private const val MAX_MONTH = 12
+        private const val MIN_YEAR = 1900
+        private val maxYear: Int
+            get() = Clock.System.now().toLocalDateTime(TimeZone.UTC).year
 
         private fun String.validateDay(): String {
             return if ((this.toIntOrNull() ?: 0) > MAX_DAY) {
@@ -58,7 +65,15 @@ class Formatters {
                 }
             }
             if (year.isNotBlank()) {
-                newString += year
+                if (year.length == 4) {
+                    when {
+                        (year.toIntOrNull() ?: 0) < MIN_YEAR -> newString += MIN_YEAR
+                        (year.toIntOrNull() ?: 0) > maxYear -> newString += maxYear
+                        else -> newString += year
+                    }
+                } else {
+                    newString += year
+                }
             }
             return newString
         }
