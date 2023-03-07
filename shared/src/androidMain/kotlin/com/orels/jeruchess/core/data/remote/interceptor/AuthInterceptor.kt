@@ -33,7 +33,8 @@ class AuthInterceptorImpl(
         override fun install(plugin: AuthInterceptor, scope: HttpClient) {
             scope.requestPipeline.intercept(HttpRequestPipeline.Before) {
                 this.context.headers.append("Authorization", plugin.getAuthHeader())
-                proceedWith(subject)
+                this.context.headers.append("Content-Type", "application/json")
+                proceedWith(this.context)
             }
         }
 

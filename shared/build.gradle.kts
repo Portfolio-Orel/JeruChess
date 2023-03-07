@@ -82,7 +82,7 @@ android {
     namespace = "com.orels.jeruchess"
     compileSdk = 33
     defaultConfig {
-        minSdk = 24
+        minSdk = 26
         targetSdk = 33
     }
 }

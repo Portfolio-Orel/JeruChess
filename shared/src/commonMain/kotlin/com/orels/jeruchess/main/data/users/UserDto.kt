@@ -12,8 +12,8 @@ data class UserDto(
     @SerialName("email") val email: String = "",
     @SerialName("gender") val gender: String = "MALE",
     @SerialName("phone_number") val phoneNumber: String = "",
-    @SerialName("player_number") val playerNumber: String = "",
-    @SerialName("date_of_birth") val dateOfBirth: Long = 0L,
+    @SerialName("player_number") val playerNumber: String? = "",
+    @SerialName("date_of_birth") val dateOfBirth: Long? = 0L,
 ) {
     fun toUser(): User = User(
         id = id,
@@ -22,8 +22,8 @@ data class UserDto(
         email = email,
         gender = Gender.fromString(gender),
         phoneNumber = phoneNumber,
-        playerNumber = playerNumber,
-        dateOfBirth = dateOfBirth,
+        playerNumber = playerNumber ?: "",
+        dateOfBirth = dateOfBirth ?: 0L
     )
 }
 
