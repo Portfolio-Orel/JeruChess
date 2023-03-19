@@ -161,6 +161,9 @@ SET name = ?,
     isRatingIsrael = ?,
     isRatingFide = ?
 WHERE id = ?;
+
+clearAllEvents:
+DELETE FROM eventEntity;
 -- Events --
 
 -- EventParticipants --
