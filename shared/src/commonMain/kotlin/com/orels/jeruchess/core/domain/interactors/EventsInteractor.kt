@@ -1,6 +1,7 @@
 package com.orels.jeruchess.core.domain.interactors
 
 import com.orels.jeruchess.main.domain.model.Event
+import com.orels.jeruchess.main.domain.model.EventParticipant
 import com.orels.jeruchess.main.domain.model.PaymentType
 
 interface EventsInteractor {
@@ -12,4 +13,6 @@ interface EventsInteractor {
                                 paidAmount: Long? = null,
                                 paymentType: PaymentType? = null
     )
+
+    suspend fun getAllEventsParticipants(eventId: String): List<EventParticipant>
 }

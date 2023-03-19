@@ -8,8 +8,11 @@ import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.android.domain.annotation.AuthConfigFile
 import com.orels.jeruchess.android.domain.annotation.BaseUrl
 import com.orels.jeruchess.android.domain.model.ConfigFile
+import com.orels.jeruchess.core.data.interactor.EventsInteractorImpl
 import com.orels.jeruchess.core.data.local.DatabaseDriverFactory
 import com.orels.jeruchess.core.data.remote.HttpClientFactory
+import com.orels.jeruchess.core.domain.interactors.EventsInteractor
+import com.orels.jeruchess.core.domain.interactors.UserInteractor
 import com.orels.jeruchess.database.JeruChessDatabase
 import com.orels.jeruchess.main.data.chess_user_data.KtorChessUserDataClient
 import com.orels.jeruchess.main.data.chess_user_data.SqlDelightChessUserDataDataSource
@@ -169,5 +172,22 @@ object AppModule {
     @AuthConfigFile
     fun provideAuthConfigFile(
     ): ConfigFile = ConfigFile(R.raw.dev_amplifyconfiguration)
+
+    @Provides
+    @Singleton
+    fun provideEventsInteractor(
+        eventsDataSource: EventsDataSource,
+        eventsClient: EventsClient,
+        eventsParticipantsClient: EventsParticipantsClient,
+        eventsParticipantsDataSource: EventsParticipantsDataSource,
+        userInteractor: UserInteractor
+
+    ): EventsInteractor = EventsInteractorImpl(
+        eventsDataSource = eventsDataSource,
+        eventsClient = eventsClient,
+        eventsParticipantsClient = eventsParticipantsClient,
+        eventsParticipantsDataSource = eventsParticipantsDataSource,
+        userInteractor = userInteractor
+    )
 
 }

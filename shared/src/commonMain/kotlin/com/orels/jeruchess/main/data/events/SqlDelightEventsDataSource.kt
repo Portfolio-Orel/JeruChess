@@ -46,7 +46,7 @@ class SqlDelightEventsDataSource(
             db.insertEventParticipant(
                 eventId = eventId,
                 userId = userId,
-                isPaid = isPaid.toLong(),
+                isPaid = isPaid?.toLong() ?: 0L,
                 paidAmount = paidAmount,
                 paymentType = paymentType?.name,
                 paidAt = paidAt,

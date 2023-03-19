@@ -13,13 +13,17 @@ class KtorEventsParticipantsClient(
     private fun baseUrl(eventId: String) =
         NetworkConstants.BASE_URL + "/events/$eventId/participants"
 
-    override suspend fun getAllEventsParticipants(eventId: String): List<EventParticipant> {
+    override suspend fun getAllEventsParticipants(eventIds: List<String>): List<EventParticipant> {
         try {
 //            val result = httpClient.get {
 //                url(baseUrl(eventId))
 //            }
 //            return result.body<List<EventParticipantDto>>().toEventParticipants()
-            return StubData.EventsParticipants.filter { it.eventId == eventId }
+            val eventParticipants = mutableListOf<EventParticipant>()
+            eventIds.forEach { eventId ->
+                eventParticipants.addAll(StubData.EventsParticipants.filter { it.eventId == eventId })
+            }
+            return eventParticipants
         } catch (e: Exception) {
             throw e
         }

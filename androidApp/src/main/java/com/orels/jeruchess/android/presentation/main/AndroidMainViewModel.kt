@@ -2,8 +2,8 @@ package com.orels.jeruchess.android.presentation.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orels.jeruchess.core.domain.interactors.EventsInteractor
 import com.orels.jeruchess.main.domain.data.events.EventsClient
-import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
 import com.orels.jeruchess.main.domain.data.games.GamesClient
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
@@ -19,7 +19,7 @@ class AndroidMainViewModel @Inject constructor(
     private val usersDataSource: UsersDataSource,
     private val eventClient: EventsClient,
     private val gamesClient: GamesClient,
-    private val eventsParticipantsClient: EventsParticipantsClient,
+    private val eventsInteractor: EventsInteractor,
     private val dataSource: MainDataSource,
 ) : ViewModel() {
 
@@ -29,7 +29,7 @@ class AndroidMainViewModel @Inject constructor(
             usersDataSource,
             eventClient,
             gamesClient,
-            eventsParticipantsClient,
+            eventsInteractor,
             dataSource,
             coroutineScope = viewModelScope
         )

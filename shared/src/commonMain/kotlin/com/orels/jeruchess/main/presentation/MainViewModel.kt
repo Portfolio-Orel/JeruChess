@@ -1,9 +1,9 @@
 package com.orels.jeruchess.main.presentation
 
+import com.orels.jeruchess.core.domain.interactors.EventsInteractor
 import com.orels.jeruchess.core.util.CommonStateFlow
 import com.orels.jeruchess.core.util.toCommonStateFlow
 import com.orels.jeruchess.main.domain.data.events.EventsClient
-import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
 import com.orels.jeruchess.main.domain.data.games.GamesClient
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import com.orels.jeruchess.main.domain.data.main.MainDataSource
@@ -20,7 +20,7 @@ class MainViewModel(
     private val usersDataSource: UsersDataSource,
     private val eventsClient: EventsClient,
     private val gamesClient: GamesClient,
-    private val eventsParticipantsClient: EventsParticipantsClient,
+    private val eventsInteractor: EventsInteractor,
     private val dataSource: MainDataSource,
     coroutineScope: CoroutineScope?
 ) {
@@ -37,7 +37,7 @@ class MainViewModel(
                 val games = gamesClient.getGamesByEventIds(events.map { it.id })
                 val eventsParticipants = mutableListOf<EventParticipant>()
                 events.groupBy { it.id }.forEach {
-                    eventsParticipants += eventsParticipantsClient.getAllEventsParticipants(it.key)
+                    eventsParticipants += eventsInteractor.getAllEventsParticipants(it.key)
                 }
                 _state.update {
                     it.copy(
@@ -193,8 +193,8 @@ class MainViewModel(
                 }
                 viewModelScope.launch {
                     try {
-                        eventsParticipantsClient.addEventParticipants(
-                            listOf(EventParticipant(event.event.id, _state.value.user!!.id))
+                        eventsInteractor.registerToEvent(
+                            event.event
                         )
                         _state.update {
                             it.copy(
@@ -229,16 +229,17 @@ class MainViewModel(
                 }
                 viewModelScope.launch {
                     try {
-                        eventsParticipantsClient.removeEventParticipants(
-                            listOf(EventParticipant(event.event.id, _state.value.user!!.id))
-                        )
-                        _state.update {
-                            it.copy(
-                                isLoading = false,
-                                selectedEvent = event.event,
-                                error = null
-                            )
-                        }
+//                        eventsInteractor.removeEventParticipants(
+//                            listOf(EventParticipant(event.event.id, _state.value.user!!.id))
+//                        )
+//                        _state.update {
+//                            it.copy(
+//                                isLoading = false,
+//                                selectedEvent = event.event,
+//                                error = null
+//                            )
+//                        }
+                        TODO("Not yet implemented")
                     } catch (e: Exception) {
                         _state.update {
                             it.copy(
