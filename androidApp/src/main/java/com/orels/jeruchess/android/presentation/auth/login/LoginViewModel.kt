@@ -58,7 +58,7 @@ class LoginViewModel @Inject constructor(
             is LoginEvent.LoginWithGoogle -> loginWithGoogle(event.activity)
             is LoginEvent.Login -> loginWithPhone(event.phoneNumber)
             is LoginEvent.Register -> state =
-                state.copy(authState = AuthState.REGISTRATION_REQUIRED)
+                state.copy(authState = AuthState.RegistrationRequired())
             is LoginEvent.Logout -> logout()
         }
     }

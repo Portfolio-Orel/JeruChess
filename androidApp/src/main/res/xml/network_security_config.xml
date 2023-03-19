@@ -2,9 +2,13 @@
 <network-security-config>
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">192.168.1.39</domain>
-        <domain includeSubdomains="true">http://localhost:3000</domain>
+        <domain includeSubdomains="true">localhost:4000</domain>
+        <domain includeSubdomains="true">https://localhost:4000</domain>
         <domain includeSubdomains="true">10.0.2.2</domain>
-        <domain includeSubdomains="true">http://chessdev.cn9qgwm3araj.us-east-2.rds.amazonaws.com</domain>
-        <domain includeSubdomains="true">chessdev.cn9qgwm3araj.us-east-2.rds.amazonaws.com</domain>
+        <domain includeSubdomains="true">http://10.0.2.2</domain>
+        <domain includeSubdomains="true">10.0.2.2:4000</domain>
+        <domain includeSubdomains="true">http://10.0.2.2:4000</domain>
+        <domain includeSubdomains="true">https://g33llytwga.execute-api.us-east-1.amazonaws.com</domain>
+        <domain includeSubdomains="true">g33llytwga.execute-api.us-east-1.amazonaws.com</domain>
     </domain-config>
 </network-security-config>

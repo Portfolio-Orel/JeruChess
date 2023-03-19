@@ -9,7 +9,7 @@ data class LoginState(
         phoneNumber = "",
         email = ""
     ),
-    val authState: AuthState = AuthState.LOGGED_OUT,
+    val authState: AuthState = AuthState.LoggedOut,
     val isLoading: Boolean = false,
     val isLoadingLogin: Boolean = false,
     val error: String? = null

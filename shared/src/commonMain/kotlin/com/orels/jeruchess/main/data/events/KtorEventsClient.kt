@@ -1,5 +1,6 @@
 package com.orels.jeruchess.main.data.events
 
+import com.orels.jeruchess.NetworkConstants
 import com.orels.jeruchess.main.domain.data.events.EventsClient
 import com.orels.jeruchess.main.domain.model.Event
 import com.orels.jeruchess.utils.StubData
@@ -17,11 +18,11 @@ class KtorEventsClient(
     private val httpClient: HttpClient
 ) : EventsClient {
 
-    private val baseUrl = "/events"
+    private val baseUrl = "events"
     override suspend fun getEvent(eventId: String): Event {
         try {
             val result = httpClient.get {
-                url("$baseUrl/$eventId")
+                url("${NetworkConstants.BASE_URL}/$baseUrl/$eventId")
             }
             return result.body<EventDto>().toEvent()
         } catch (e: Exception) {

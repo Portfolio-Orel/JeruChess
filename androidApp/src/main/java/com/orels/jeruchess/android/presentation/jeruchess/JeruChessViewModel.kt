@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.orels.jeruchess.android.domain.AuthInteractor
-import com.orels.jeruchess.android.domain.AuthState
 import com.orels.jeruchess.main.domain.data.main.MainClient
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.catch
@@ -24,7 +23,7 @@ class JeruChessViewModel @Inject constructor(
     var state by mutableStateOf(JeruChessState())
 
     init {
-        observeUser()
+        observeAuthState()
         viewModelScope.launch {
             client.getClub().also {
                 state = state.copy(
@@ -35,18 +34,17 @@ class JeruChessViewModel @Inject constructor(
         }
     }
 
-    private fun observeUser() {
+    private fun observeAuthState() {
         viewModelScope.launch {
             authInteractor.getAuthState()
                 .catch {
                     state = state.copy(
-                        isAuthenticated = false,
                         isLoading = false
                     )
                 }
                 .collect {
                     state = state.copy(
-                        isAuthenticated = it == AuthState.LOGGED_IN,
+                        authState = it,
                         isLoading = false
                     )
                 }

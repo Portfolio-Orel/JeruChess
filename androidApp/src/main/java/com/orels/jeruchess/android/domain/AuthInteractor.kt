@@ -15,17 +15,26 @@ interface AuthInteractor {
     suspend fun getAuthState(): CommonFlow<AuthState>
 }
 
-enum class AuthState {
-    LOGGED_IN,
-    LOGGED_OUT,
-    CONFIRMATION_REQUIRED,
-    REGISTRATION_REQUIRED,
-    LOADING,
-    ERROR;
+sealed class AuthState(val name: String) {
+    object LoggedIn : AuthState(name = "LoggedIn")
+    object LoggedOut : AuthState(name = "LoggedOut")
+    data class ConfirmationRequired(val email: String? = null, val phoneNumber: String? = null) :
+        AuthState(name = "ConfirmationRequired")
+
+    data class RegistrationRequired(val email: String = "", val phoneNumber: String = "") :
+        AuthState(name = "RegistrationRequired")
+
+    object Loading : AuthState(name = "Loading")
+    data class Error(val message: String) : AuthState(name = "Error")
 
     companion object {
-        fun fromString(value: String): AuthState {
-            return values().first { it.name == value }
+        fun fromString(name: String): AuthState = when (name) {
+            LoggedIn.name -> LoggedIn
+            LoggedOut.name -> LoggedOut
+            ConfirmationRequired().name -> ConfirmationRequired()
+            RegistrationRequired().name -> RegistrationRequired()
+            Loading.name -> Loading
+            else -> Error(name)
         }
     }
 }

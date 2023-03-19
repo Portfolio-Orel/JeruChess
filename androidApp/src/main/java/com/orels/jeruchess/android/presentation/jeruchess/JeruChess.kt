@@ -17,9 +17,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.orels.jeruchess.android.core.presentation.RoutesArguments.PRE_INSERTED_EMAIL
-import com.orels.jeruchess.android.core.presentation.RoutesArguments.PRE_INSERTED_PHONE_NUMBER
+import com.orels.jeruchess.android.core.presentation.RoutesArguments
 import com.orels.jeruchess.android.core.presentation.Screens
+import com.orels.jeruchess.android.domain.AuthState
 import com.orels.jeruchess.android.presentation.auth.forgot_password.ForgotPasswordScreen
 import com.orels.jeruchess.android.presentation.auth.login.LoginScreen
 import com.orels.jeruchess.android.presentation.auth.register.RegisterScreen
@@ -37,10 +37,10 @@ fun JeruChess(
     val navController = navHostController as NavController
     val state = viewModel.state
 
-    if (state.isLoading) {
+    if (state.isLoading || state.authState == AuthState.Loading) {
         LoadingContent()
     } else {
-        if (!state.isAuthenticated) {
+        if (state.authState == AuthState.LoggedOut) {
             UnAuthenticatedContent(
                 navController = navController,
                 navHostController = navHostController
@@ -90,10 +90,43 @@ fun AuthenticatedContent(
                 start = it.calculateStartPadding(LayoutDirection.Rtl)
             ),
             navController = navHostController,
-            startDestination = Screens.Main.route
+            startDestination = if (viewModel.state.authState.name == AuthState.RegistrationRequired().name) {
+                Screens.Register.withArgs(
+                    (viewModel.state.authState as AuthState.RegistrationRequired).phoneNumber,
+                    (viewModel.state.authState as AuthState.RegistrationRequired).email
+                )
+            } else Screens.Main.route
         ) {
             composable(route = Screens.Login.route) {
                 LoginScreen(navController = navController)
+            }
+            composable(
+                route = Screens.Register.withArgsForRoute(
+                    RoutesArguments.PRE_INSERTED_PHONE_NUMBER,
+                    RoutesArguments.PRE_INSERTED_EMAIL
+                ),
+                arguments = listOf(
+                    navArgument(RoutesArguments.PRE_INSERTED_PHONE_NUMBER) {
+                        defaultValue = ""
+                    },
+                    navArgument(RoutesArguments.PRE_INSERTED_EMAIL) {
+                        defaultValue = ""
+                    },
+                )
+            ) { navBackStackEntry ->
+                val preInsertedPhoneNumber =
+                    navBackStackEntry.arguments?.getString(
+                        RoutesArguments.PRE_INSERTED_PHONE_NUMBER
+                    ) ?: ""
+                val preInsertedEmail =
+                    navBackStackEntry.arguments?.getString(
+                        RoutesArguments.PRE_INSERTED_EMAIL
+                    ) ?: ""
+                RegisterScreen(
+                    navController = navController,
+                    preInsertedPhoneNumber = preInsertedPhoneNumber,
+                    preInsertedEmail = preInsertedEmail
+                )
             }
             composable(route = Screens.Main.route) {
                 val mainViewModel = hiltViewModel<AndroidMainViewModel>()
@@ -121,33 +154,8 @@ fun UnAuthenticatedContent(
         composable(route = Screens.Login.route) {
             LoginScreen(navController = navController)
         }
-        composable(
-            route = Screens.Register.withArgsForRoute(
-                PRE_INSERTED_PHONE_NUMBER,
-                PRE_INSERTED_EMAIL
-            ),
-            arguments = listOf(
-                navArgument(PRE_INSERTED_PHONE_NUMBER) {
-                    defaultValue = ""
-                },
-                navArgument(PRE_INSERTED_EMAIL) {
-                    defaultValue = ""
-                },
-            )
-        ) { navBackStackEntry ->
-            val preInsertedPhoneNumber =
-                navBackStackEntry.arguments?.getString(
-                    PRE_INSERTED_PHONE_NUMBER
-                ) ?: ""
-            val preInsertedEmail =
-                navBackStackEntry.arguments?.getString(
-                    PRE_INSERTED_EMAIL
-                ) ?: ""
-            RegisterScreen(
-                navController = navController,
-                preInsertedPhoneNumber = preInsertedPhoneNumber,
-                preInsertedEmail = preInsertedEmail
-            )
+        composable(route = Screens.Register.route) {
+            RegisterScreen(navController = navController)
         }
         composable(route = Screens.ForgotPassword.route) {
             ForgotPasswordScreen(navController = navController)
