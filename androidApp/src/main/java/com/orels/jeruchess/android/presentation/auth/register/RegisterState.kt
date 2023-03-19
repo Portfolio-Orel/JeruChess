@@ -11,7 +11,9 @@ data class RegisterState(
     val phoneNumber: String = "",
     val playerNumber: String = "", // TODO
     val dateOfBirth: Long = 0L,
+    val code: String = "",
 
-    val isLoginLoading: Boolean = false,
 
-)
+    val isLoading: Boolean = false,
+
+    )

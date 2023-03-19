@@ -37,12 +37,13 @@ fun Input(
     keyboardType: CustomKeyboardType = CustomKeyboardType.Text,
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = { },
+    value: String = "",
     onTextChange: (String) -> Unit = {},
     isDisabled: Boolean = false,
     formatter: (String) -> String = { it }
 ) {
-    var textFieldValueState = remember { mutableStateOf(TextFieldValue(initialText)) }
-    var previousText = remember { mutableStateOf(initialText) }
+    val textFieldValueState = remember { mutableStateOf(TextFieldValue(value)) }
+    val previousText = remember { mutableStateOf(initialText) }
 
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
     val lineHeight = 40
@@ -69,12 +70,18 @@ fun Input(
                     .focusable(enabled = shouldFocus),
                 value = textFieldValueState.value,
                 onValueChange = {
+                    if (previousText.value == it.text) return@OutlinedTextField
                     var newValue = it.text
                     if (maxCharacters != null) {
                         newValue = it.text.takeLast(maxCharacters)
                     }
                     textFieldValueState.value =
-                        keyboardType.buildTextFieldValue(newValue, previousText.value, formatter)
+                        keyboardType.buildTextFieldValue(
+                            it.composition,
+                            newValue,
+                            previousText.value,
+                            formatter
+                        )
                     newValue = formatter(newValue)
                     previousText.value = newValue
                     onTextChange(newValue)
@@ -126,10 +133,16 @@ private fun PasswordIcon(
 @Suppress("unused")
 enum class CustomKeyboardType(
     val type: KeyboardType,
-    val buildTextFieldValue: (newValue: String, previousValue: String, formatter: (String) -> String) -> TextFieldValue = { newValue, _, _ ->
+    val buildTextFieldValue: (
+        currentComposition: TextRange?,
+        newValue: String,
+        previousValue: String,
+        formatter: (String) -> String
+    ) -> TextFieldValue = { currentComposition, newValue, _, _ ->
         TextFieldValue(
             newValue,
-            TextRange(newValue.length)
+            TextRange(newValue.length),
+            currentComposition
         )
     }
 ) {
@@ -139,12 +152,18 @@ enum class CustomKeyboardType(
     Uri(type = KeyboardType.Uri),
     Text(type = KeyboardType.Text),
     Password(type = KeyboardType.Password),
-    Email(type = KeyboardType.Email),
+    Email(type = KeyboardType.Email, buildTextFieldValue = { currentComposition, newValue, _, _ ->
+        TextFieldValue(
+            newValue.replace(" ", ""),
+            TextRange(newValue.length),
+            currentComposition
+        )
+    }),
     Phone(type = KeyboardType.Phone),
     Decimal(type = KeyboardType.Decimal),
     Date(
         type = KeyboardType.Phone,
-        buildTextFieldValue = { newValue, previousValue, formatter ->
+        buildTextFieldValue = { _, newValue, previousValue, formatter ->
             val cursorPosition =
                 if (newValue.length < previousValue.length) { // It's a delete
                     if (newValue.takeLast(1) == "/") newValue.length - 1 else newValue.length

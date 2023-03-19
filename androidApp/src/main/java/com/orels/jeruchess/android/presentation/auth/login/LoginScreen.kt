@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -17,13 +18,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.orels.jeruchess.android.R
+import com.orels.jeruchess.android.core.presentation.RoutesArguments
 import com.orels.jeruchess.android.core.presentation.Screens
+import com.orels.jeruchess.android.domain.AuthState
 import com.orels.jeruchess.android.presentation.components.CustomKeyboardType
 import com.orels.jeruchess.android.presentation.components.Input
 import com.orels.jeruchess.android.presentation.components.Loading
@@ -38,6 +40,12 @@ fun LoginScreen(
     val context = LocalContext.current
 
     val phoneNumber = remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = state.authState) {
+        if (state.authState is AuthState.RegistrationRequired) {
+            navController.navigate(Screens.Register.route)
+        }
+    }
 
     if (state.isLoading) {
         Box(
@@ -101,8 +109,10 @@ fun LoginScreen(
                             .noRippleClickable {
                                 navController.navigate(
                                     Screens.Register.withArgs(
-                                        state.user.phoneNumber,
-                                        state.user.email
+                                        mapOf(
+                                            RoutesArguments.PRE_INSERTED_PHONE_NUMBER to state.user.phoneNumber,
+                                            RoutesArguments.PRE_INSERTED_EMAIL to state.user.email
+                                        )
                                     )
                                 ) {
                                     popUpTo(Screens.Login.route) {
@@ -125,7 +135,7 @@ fun LoginScreen(
                                 LoginEvent.Login(
                                     phoneNumber = phoneNumber.value,
                                 ),
-                                )
+                            )
                         }
                     },
                     shape = MaterialTheme.shapes.medium,

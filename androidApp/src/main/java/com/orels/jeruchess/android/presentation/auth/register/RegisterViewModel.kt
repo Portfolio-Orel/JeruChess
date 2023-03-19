@@ -9,7 +9,9 @@ import com.orels.jeruchess.android.domain.AuthEvent
 import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.main.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -29,11 +31,24 @@ class RegisterViewModel @Inject constructor(
             is RegisterEvent.SetGender -> state = state.copy(gender = event.gender)
             is RegisterEvent.SetDateOfBirth -> state = state.copy(dateOfBirth = event.dateOfBirth)
             is RegisterEvent.Register -> register()
+            is RegisterEvent.CompleteRegistration -> register()
+            is RegisterEvent.ConfirmCode -> confirmCode()
         }
 
 
+    private fun confirmCode() {
+        viewModelScope.launch {
+            authInteractor.onAuth(
+                AuthEvent.ConfirmCode(
+                    code = state.code,
+                )
+            )
+        }
+    }
+
     private fun register() {
         viewModelScope.launch {
+            state = state.copy(isLoading = true)
             authInteractor.onAuth(
                 AuthEvent.Register(
                     user = User(
@@ -47,6 +62,9 @@ class RegisterViewModel @Inject constructor(
                     )
                 )
             )
+            withContext(Dispatchers.Main) {
+                state = state.copy(isLoading = false)
+            }
         }
     }
 }

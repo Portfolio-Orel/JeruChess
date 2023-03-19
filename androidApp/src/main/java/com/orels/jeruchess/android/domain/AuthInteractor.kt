@@ -4,6 +4,7 @@ import android.app.Activity
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.model.User
+import kotlinx.serialization.Serializable
 
 interface AuthInteractor {
     suspend fun initialize(configFile: ConfigFile)
@@ -15,16 +16,44 @@ interface AuthInteractor {
     suspend fun getAuthState(): CommonFlow<AuthState>
 }
 
+@Serializable
 sealed class AuthState(val name: String) {
+    open fun setAttributes(attributes: Map<String, String>): AuthState {
+        return this
+    }
+
+    @Serializable
     object LoggedIn : AuthState(name = "LoggedIn")
+
+    @Serializable
     object LoggedOut : AuthState(name = "LoggedOut")
+
+    @Serializable
     data class ConfirmationRequired(val email: String? = null, val phoneNumber: String? = null) :
-        AuthState(name = "ConfirmationRequired")
+        AuthState(name = "ConfirmationRequired") {
+        override fun setAttributes(attributes: Map<String, String>): AuthState {
+            return ConfirmationRequired(
+                email = attributes["email"] ?: email,
+                phoneNumber = attributes["phone_number"] ?: phoneNumber
+            )
+        }
+    }
 
+    @Serializable
     data class RegistrationRequired(val email: String = "", val phoneNumber: String = "") :
-        AuthState(name = "RegistrationRequired")
+        AuthState(name = "RegistrationRequired") {
+        override fun setAttributes(attributes: Map<String, String>): AuthState {
+            return RegistrationRequired(
+                email = attributes["email"] ?: email,
+                phoneNumber = attributes["phone_number"] ?: phoneNumber
+            )
+        }
+    }
 
+    @Serializable
     object Loading : AuthState(name = "Loading")
+
+    @Serializable
     data class Error(val message: String) : AuthState(name = "Error")
 
     companion object {
@@ -43,5 +72,6 @@ sealed class AuthEvent {
     data class LoginWithGoogle(val activity: Activity) : AuthEvent()
     data class LoginWithPhone(val phoneNumber: String) : AuthEvent()
     data class Register(val user: User) : AuthEvent()
+    data class ConfirmCode(val code: String) : AuthEvent()
     object Logout : AuthEvent()
 }

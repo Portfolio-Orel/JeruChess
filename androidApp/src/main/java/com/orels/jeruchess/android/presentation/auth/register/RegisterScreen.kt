@@ -90,11 +90,14 @@ fun RegisterScreen(
     val stage = remember { mutableStateOf(Stage.BASIC_INFORMATION) }
 
     LaunchedEffect(key1 = preInsertedEmail) {
-        viewModel.onEvent(RegisterEvent.SetEmail(preInsertedEmail))
+        if (preInsertedEmail.isNotBlank() && preInsertedEmail != Screens.navigationArgumentDefaultValue)
+            viewModel.onEvent(RegisterEvent.SetEmail(preInsertedEmail))
     }
 
     LaunchedEffect(key1 = preInsertedPhoneNumber) {
-        viewModel.onEvent(RegisterEvent.SetPhoneNumber(preInsertedPhoneNumber))
+        if (preInsertedPhoneNumber.isNotBlank() && preInsertedEmail != Screens.navigationArgumentDefaultValue) {
+            viewModel.onEvent(RegisterEvent.SetPhoneNumber(preInsertedPhoneNumber))
+        }
     }
 
     BackPressHandler {
@@ -134,6 +137,7 @@ fun RegisterScreen(
             onDetailsEntered = { mail, number ->
                 viewModel.onEvent(RegisterEvent.SetEmail(mail))
                 viewModel.onEvent(RegisterEvent.SetPhoneNumber(number))
+                viewModel.onEvent(RegisterEvent.CompleteRegistration)
                 stage.value = stage.value.next()
             },
             validateEmail = { Validators.isEmailValid(it) },
@@ -141,8 +145,9 @@ fun RegisterScreen(
         )
     }
 
-    AnimateContent(shouldShow = stage.value == Stage.CONFIRMATION) {
+    AnimateContent(shouldShow = stage.value == Stage.CONFIRMATION && state.isLoading.not()) {
         ConfirmationCodeDialog {
+            viewModel.onEvent(RegisterEvent.ConfirmCode(it))
             stage.value = stage.value.next()
         }
     }
@@ -154,7 +159,7 @@ fun RegisterScreen(
                     popUpTo(Screens.Register.route) { inclusive = true }
                 }
             },
-            isLoading = state.isLoginLoading
+            isLoading = state.isLoading
         )
     }
 }
@@ -167,20 +172,20 @@ fun GetBasicInformation(
     firstName: String = "",
     lastName: String = "",
 ) {
-    var firstNameValue by remember { mutableStateOf(firstName) }
-    var firstNameError by remember { mutableStateOf(false) }
+    val firstNameValue = remember { mutableStateOf(firstName) }
+    val firstNameError = remember { mutableStateOf(false) }
 
-    var lastNameValue by remember { mutableStateOf(lastName) }
-    var lastNameError by remember { mutableStateOf(false) }
+    val lastNameValue = remember { mutableStateOf(lastName) }
+    val lastNameError = remember { mutableStateOf(false) }
 
-    var genderValue by remember { mutableStateOf(gender) }
+    val genderValue = remember { mutableStateOf(gender) }
 
-    var dateOfBirthValue by remember {
+    val dateOfBirthValue = remember {
         mutableStateOf(
             dateOfBirth.toRegisterDate()?.registerString ?: ""
         )
     }
-    var dateOfBirthError by remember { mutableStateOf(false) }
+    val dateOfBirthError = remember { mutableStateOf(false) }
 
 
     Column(
@@ -201,11 +206,12 @@ fun GetBasicInformation(
             placeholder = stringResource(R.string.placeholder_first_name),
             minLines = 1,
             maxLines = 1,
-            isError = firstNameError,
-            initialText = firstNameValue,
+            isError = firstNameError.value,
+            initialText = firstNameValue.value,
             isPassword = false,
+
             onTextChange = {
-                firstNameValue = it
+                firstNameValue.value = it
             }
         )
         Input(
@@ -213,24 +219,24 @@ fun GetBasicInformation(
             placeholder = stringResource(R.string.placeholder_last_name),
             minLines = 1,
             maxLines = 1,
-            isError = lastNameError,
-            initialText = lastNameValue,
+            isError = lastNameError.value,
+            initialText = lastNameValue.value,
             isPassword = false,
             onTextChange = {
-                lastNameValue = it
+                lastNameValue.value = it
             }
         )
         Input(
             title = stringResource(R.string.date_of_birth),
             minLines = 1,
             maxLines = 1,
-            isError = dateOfBirthError,
-            initialText = Formatters.toDateString(dateOfBirthValue),
+            isError = dateOfBirthError.value,
+            initialText = Formatters.toDateString(dateOfBirthValue.value),
             placeholder = Formatters.toDateString(stringResource(R.string.default_date_of_birth)),
             isPassword = false,
             keyboardType = CustomKeyboardType.Date,
             onTextChange = {
-                dateOfBirthValue = it
+                dateOfBirthValue.value = it
             },
             formatter = { Formatters.toDateString(it) },
         )
@@ -242,9 +248,9 @@ fun GetBasicInformation(
             Gender.values().forEach { gender ->
                 GenderContainer(
                     gender = gender,
-                    selected = genderValue == gender,
+                    selected = genderValue.value == gender,
                     onClick = {
-                        genderValue = it
+                        genderValue.value = it
                     },
                 )
             }
@@ -252,19 +258,19 @@ fun GetBasicInformation(
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
-                lastNameError = false
-                firstNameError = false
-                if (firstNameValue.isNotBlank() && lastNameValue.isNotBlank() && dateOfBirthValue.isDateValid() && genderValue != null) {
+                lastNameError.value = false
+                firstNameError.value = false
+                if (firstNameValue.value.isNotBlank() && lastNameValue.value.isNotBlank() && dateOfBirthValue.value.isDateValid() && genderValue.value != null) {
                     onNameEntered(
-                        firstNameValue,
-                        lastNameValue,
-                        genderValue!!,
-                        dateOfBirthValue.toRegisterDateLong()
+                        firstNameValue.value,
+                        lastNameValue.value,
+                        genderValue.value!!,
+                        dateOfBirthValue.value.toRegisterDateLong()
                     )
                 } else {
-                    firstNameError = firstNameValue.isBlank()
-                    lastNameError = lastNameValue.isBlank()
-                    dateOfBirthError = dateOfBirthValue.isBlank()
+                    firstNameError.value = firstNameValue.value.isBlank()
+                    lastNameError.value = lastNameValue.value.isBlank()
+                    dateOfBirthError.value = dateOfBirthValue.value.isBlank()
                 }
             }, text = stringResource(R.string.next)
         )
@@ -282,10 +288,10 @@ fun GetEmailAndPhoneNumber(
     email: String = "",
     phoneNumber: String = "",
 ) {
-    var number by remember { mutableStateOf(phoneNumber) }
-    var numberError by remember { mutableStateOf(false) }
-    var emailValue by remember { mutableStateOf(email) }
-    var emailError by remember { mutableStateOf(false) }
+    val number = remember { mutableStateOf(phoneNumber) }
+    val numberError = remember { mutableStateOf(false) }
+    val emailValue = remember { mutableStateOf(email) }
+    val emailError = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -304,12 +310,12 @@ fun GetEmailAndPhoneNumber(
             title = stringResource(R.string.email),
             minLines = 1,
             maxLines = 1,
-            isError = emailError,
-            initialText = emailValue,
+            isError = emailError.value,
+            initialText = emailValue.value,
             isPassword = false,
             onTextChange = {
-                emailValue = it
-                emailError = false
+                emailValue.value = it
+                emailError.value = false
             },
             isDisabled = isEmailDisabled
         )
@@ -317,11 +323,11 @@ fun GetEmailAndPhoneNumber(
             title = stringResource(R.string.phone_number),
             minLines = 1,
             maxLines = 1,
-            isError = numberError,
-            initialText = number,
+            isError = numberError.value,
+            initialText = number.value,
             isPassword = false,
             onTextChange = {
-                number = it
+                number.value = it
             },
             isDisabled = isPhoneNumberDisabled
         )
@@ -329,19 +335,19 @@ fun GetEmailAndPhoneNumber(
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
-                emailError = false
-                numberError = false
-                if (!validateEmail(emailValue)) {
-                    emailError = true
+                emailError.value = false
+                numberError.value = false
+                if (!validateEmail(emailValue.value)) {
+                    emailError.value = true
                 }
-                if (!validatePhoneNumber(number)) {
-                    numberError = true
+                if (!validatePhoneNumber(number.value)) {
+                    numberError.value = true
                 }
-                if (!emailError && !numberError && emailValue.isNotBlank() && number.isNotBlank()) {
-                    onDetailsEntered(emailValue, number)
+                if (!emailError.value && !numberError.value && emailValue.value.isNotBlank() && number.value.isNotBlank()) {
+                    onDetailsEntered(emailValue.value, number.value)
                 } else {
-                    emailError = emailValue.isBlank()
-                    numberError = number.isBlank()
+                    emailError.value = emailValue.value.isBlank()
+                    numberError.value = number.value.isBlank()
                 }
             }, text = stringResource(R.string.next)
         )

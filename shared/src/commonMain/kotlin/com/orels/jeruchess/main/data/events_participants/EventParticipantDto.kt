@@ -8,11 +8,11 @@ import kotlinx.serialization.SerialName
 data class EventParticipantDto(
     @SerialName("user_id") val userId: String,
     @SerialName("event_id") val eventId: String,
-    @SerialName("is_paid") val isPaid: Boolean,
-    @SerialName("amount_paid") val paidAmount: Long,
-    @SerialName("paid_at") val paidAt: Long,
-    @SerialName("payment_type") val paymentType: String,
-    @SerialName("is_active") val isActive: Boolean?
+    @SerialName("is_paid") val isPaid: Boolean? = false,
+    @SerialName("amount_paid") val paidAmount: Long? = 0L,
+    @SerialName("paid_at") val paidAt: Long? = null,
+    @SerialName("payment_type") val paymentType: String? = null,
+    @SerialName("is_active") val isActive: Boolean? = true
 ) {
     fun toEventParticipant() = EventParticipant(
         userId = userId,
@@ -20,7 +20,7 @@ data class EventParticipantDto(
         isPaid = isPaid,
         paidAmount = paidAmount,
         paidAt = paidAt,
-        paymentType = PaymentType.valueOf(paymentType),
+        paymentType = paymentType?.let { PaymentType.valueOf(it) },
         isActive = isActive ?: true
     )
 }

@@ -41,6 +41,10 @@ class AndroidMainViewModel @Inject constructor(
         viewModel.onEvent(MainEvent.GetClub)
     }
 
+    fun onEvent(event: MainEvent) {
+        viewModel.onEvent(event)
+    }
+
     fun isRegistered(eventId: String): Boolean = state
         .value
         .eventsParticipants

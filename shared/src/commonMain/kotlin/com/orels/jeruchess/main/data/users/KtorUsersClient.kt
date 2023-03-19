@@ -15,7 +15,7 @@ class KtorUsersClient(
     override suspend fun createUser(user: User): User {
         try {
             val result = httpClient.post {
-                url(baseUrl)
+                url("${NetworkConstants.BASE_URL}/$baseUrl")
                 header("Content-Type", "application/json")
                 setBody(user.toUserDto())
             }

@@ -21,7 +21,7 @@ actual class HttpClientFactory {
         }
         client.plugin(HttpSend).intercept { request ->
             dataSource.getUser()?.id?.let {
-                request.headers.append("Authorization", it)
+                request.headers.append("userid", it)
                 request.headers.append("Content-Type", "application/json")
             }
             val originalCall = execute(request)

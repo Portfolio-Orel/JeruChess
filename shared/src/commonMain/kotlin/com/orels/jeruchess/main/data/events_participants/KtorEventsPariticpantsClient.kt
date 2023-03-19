@@ -31,6 +31,7 @@ class KtorEventsParticipantsClient(
             httpClient.post {
                 url(baseUrl(eventId))
                 setBody(eventParticipant.toEventParticipantsDto())
+                header("Content-Type", "application/json")
             }
         } catch (e: Exception) {
             throw e

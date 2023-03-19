@@ -9,5 +9,6 @@ data class MainState(
     val games: List<Game> = emptyList(),
     val isLoading: Boolean = false,
     val user: User? = null,
+    val selectedEvent: Event? = null,
     val error: String? = null
 )

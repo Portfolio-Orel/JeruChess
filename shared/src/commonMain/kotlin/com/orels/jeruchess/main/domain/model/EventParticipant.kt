@@ -8,9 +8,9 @@ enum class PaymentType {
 data class EventParticipant(
     var eventId: String,
     var userId: String,
-    var isPaid: Boolean,
-    var paidAt: Long?,
-    var paidAmount: Long?,
-    var paymentType: PaymentType?,
-    var isActive: Boolean
+    var isPaid: Boolean? = false,
+    var paidAt: Long? = null,
+    var paidAmount: Long? = null,
+    var paymentType: PaymentType? = null,
+    var isActive: Boolean = true,
 )

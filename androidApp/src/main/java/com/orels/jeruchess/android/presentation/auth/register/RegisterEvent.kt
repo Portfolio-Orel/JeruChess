@@ -10,5 +10,7 @@ sealed class RegisterEvent {
     data class SetEmail(val email: String): RegisterEvent()
     data class SetGender(val gender: Gender): RegisterEvent()
     data class SetDateOfBirth(val dateOfBirth: Long): RegisterEvent()
+    data class ConfirmCode(val code: String): RegisterEvent()
+    object CompleteRegistration: RegisterEvent()
     object Register: RegisterEvent()
 }

@@ -178,6 +178,78 @@ class MainViewModel(
             MainEvent.NavigateToClubAddress -> {}
             is MainEvent.PayByCard -> TODO()
             is MainEvent.PayByCash -> TODO()
+            MainEvent.ClearSelectedEvent -> {
+                _state.update {
+                    it.copy(
+                        selectedEvent = null
+                    )
+                }
+            }
+            is MainEvent.RegisterToEvent -> {
+                _state.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
+                viewModelScope.launch {
+                    try {
+                        eventsParticipantsClient.addEventParticipants(
+                            listOf(EventParticipant(event.event.id, _state.value.user!!.id))
+                        )
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                selectedEvent = event.event,
+                                error = null
+                            )
+                        }
+                    } catch (e: Exception) {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = e.message
+                            )
+                        }
+                    }
+                }
+
+            }
+            is MainEvent.SetSelectedEvent ->  {
+                _state.update {
+                    it.copy(
+                        selectedEvent = event.event
+                    )
+                }
+            }
+            is MainEvent.UnregisterFromEvent -> {
+                _state.update {
+                    it.copy(
+                        isLoading = true
+                    )
+                }
+                viewModelScope.launch {
+                    try {
+                        eventsParticipantsClient.removeEventParticipants(
+                            listOf(EventParticipant(event.event.id, _state.value.user!!.id))
+                        )
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                selectedEvent = event.event,
+                                error = null
+                            )
+                        }
+                    } catch (e: Exception) {
+                        _state.update {
+                            it.copy(
+                                isLoading = false,
+                                error = e.message
+                            )
+                        }
+                    }
+                }
+
+            }
         }
     }
 }

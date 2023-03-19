@@ -54,82 +54,80 @@ fun EventDetails(
                 .padding(24.dp),
         ) {
             if (isRegistered) {
-                Register(
-                    event = event,
-                    onDismiss = onDismiss,
-                    onPayByCardClick = onPayByCardClick,
+                RegistrationPopUp(
+                    description = {
+                        Text(
+                            text = "${stringResource(R.string.what_a_shame_to_see_you_go)}\n ${
+                                stringResource(
+                                    id = R.string.hope_to_see_you_again_soon
+                                )
+                            }",
+                            style = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
+                            color = MaterialTheme.colors.onSurface
+                        )
+                    },
+                    primaryActionText = stringResource(id = R.string.thanks),
+                    secondaryActionText = stringResource(R.string.nevermind_i_will_stay_exclamation),
+                    primaryAction = { onDismiss() },
+                    secondaryAction = { onUnregister(event) }
                 )
             } else {
-                CancelRegistration(
-                    event = event,
-                    onDismiss = onDismiss,
-                    onUnregister = onUnregister
+                RegistrationPopUp(
+                    description = {
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = event.name,
+                                style = MaterialTheme.typography.h5,
+                                color = MaterialTheme.colors.onSurface
+                            )
+                            Text(
+                                text = event.description,
+                                style = MaterialTheme.typography.body1,
+                                color = MaterialTheme.colors.onSurface
+                            )
+                        }
+                    },
+                    primaryActionText = stringResource(id = R.string.i_will_pay_now),
+                    secondaryActionText = stringResource(R.string.later),
+                    primaryAction = { onPayByCardClick(event) },
+                    secondaryAction = { onPayByCashClick(event) }
                 )
             }
         }
     }
 }
 
-@Composable
-fun Register(
-    event: Event,
-    onDismiss: OnDismiss,
-    onPayByCardClick: OnPayByCardClick,
-) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = event.name,
-            style = MaterialTheme.typography.h5,
-            color = MaterialTheme.colors.onSurface
-        )
-        Text(
-            text = event.description,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onSurface
-        )
-    }
-    ActionButton(
-        onClick = { onPayByCardClick(event) }, colors = ButtonDefaults.buttonColors(
-            backgroundColor = MaterialTheme.colors.primary,
-            contentColor = MaterialTheme.colors.onPrimary
-        ), text = stringResource(R.string.i_will_pay_now)
-    )
-    Text(
-        modifier = Modifier.clickable { onDismiss() },
-        text = "Later",
-        style = MaterialTheme.typography.body1,
-        color = MaterialTheme.colors.primary
-    )
-}
 
 @Composable
-fun CancelRegistration(event: Event, onDismiss: OnDismiss, onUnregister: OnUnregister) {
+fun RegistrationPopUp(
+    description: @Composable () -> Unit,
+    primaryActionText: String,
+    secondaryActionText: String,
+    primaryAction: () -> Unit,
+    secondaryAction: () -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(32.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "${stringResource(R.string.what_a_shame_to_see_you_go)}\n ${stringResource(id = R.string.hope_to_see_you_again_soon)}",
-            style = MaterialTheme.typography.body1.copy(fontSize = 18.sp),
-            color = MaterialTheme.colors.onSurface
-        )
+        description()
 
         Column(
             verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ActionButton(
-                onClick = { onUnregister(event) }, colors = ButtonDefaults.buttonColors(
+                onClick = { primaryAction() }, colors = ButtonDefaults.buttonColors(
                     backgroundColor = MaterialTheme.colors.primary,
                     contentColor = MaterialTheme.colors.onPrimary
-                ), text = stringResource(R.string.thanks)
+                ), text = primaryActionText
             )
             Text(
-                modifier = Modifier.clickable { onDismiss() },
-                text = stringResource(R.string.nevermind_i_will_stay_exclamation),
+                modifier = Modifier.clickable { secondaryAction() },
+                text = secondaryActionText,
                 style = MaterialTheme.typography.body1,
                 color = MaterialTheme.colors.primary
             )
