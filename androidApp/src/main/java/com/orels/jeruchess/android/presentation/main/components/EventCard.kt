@@ -40,6 +40,7 @@ fun EventCard(
     maxRounds: Int = 1,
     participants: List<EventParticipant> = emptyList(),
     isRegistered: Boolean = false,
+    isLoading: Boolean = false,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val cardColor = remember { CardColors.getCardColor(isDarkTheme) }
@@ -93,7 +94,8 @@ fun EventCard(
                         backgroundColor = if (isRegistered) MaterialTheme.colors.error else MaterialTheme.colors.secondary,
                         contentColor = if (isRegistered) MaterialTheme.colors.onError else MaterialTheme.colors.onSecondary
                     ),
-                    elevation = ButtonDefaults.elevation(0.dp)
+                    elevation = ButtonDefaults.elevation(0.dp),
+                    isLoading = isLoading,
                 )
             }
         }

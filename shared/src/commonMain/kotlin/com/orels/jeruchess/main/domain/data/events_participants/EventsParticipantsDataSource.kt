@@ -10,4 +10,6 @@ interface EventsParticipantsDataSource {
     suspend fun removeEventParticipants(eventParticipant: EventsParticipants)
     suspend fun insertEventsParticipants(eventsParticipants: EventsParticipants)
     suspend fun getEventsParticipantsFlow(): CommonFlow<EventsParticipants>
+
+    suspend fun clear()
 }

@@ -23,7 +23,7 @@ import com.orels.jeruchess.android.presentation.components.ActionButton
 import com.orels.jeruchess.main.domain.model.Event
 
 typealias OnPayByCardClick = (Event) -> Unit
-typealias OnPayByCashClick = (Event) -> Unit
+typealias OnLaterClick = (Event) -> Unit
 typealias OnUnregister = (Event) -> Unit
 typealias OnDismiss = () -> Unit
 
@@ -33,15 +33,15 @@ fun EventDetails(
     onDismiss: OnDismiss,
     isRegistered: Boolean,
     onUnregister: OnUnregister,
-    onPayByCardClick: OnPayByCardClick = {},
-    onPayByCashClick: OnPayByCashClick = {}
+    onPayByCardClick: OnPayByCardClick,
+    onLaterClick: OnLaterClick
 ) {
 
     Dialog(
         onDismissRequest = onDismiss,
         DialogProperties(
-            dismissOnBackPress = false,
-            dismissOnClickOutside = false,
+            dismissOnBackPress = true,
+            dismissOnClickOutside = true,
         )
     ) {
         Box(
@@ -93,7 +93,7 @@ fun EventDetails(
                     primaryActionText = stringResource(id = R.string.i_will_pay_now),
                     secondaryActionText = stringResource(R.string.later),
                     primaryAction = { onPayByCardClick(event) },
-                    secondaryAction = { onPayByCashClick(event) }
+                    secondaryAction = { onLaterClick(event) }
                 )
             }
         }

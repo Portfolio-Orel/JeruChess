@@ -8,6 +8,8 @@ data class MainState(
     val eventsParticipants: List<EventParticipant> = emptyList(),
     val games: List<Game> = emptyList(),
     val isLoading: Boolean = false,
+    val loadingEventName: String? = null,
+    val paymentUrl: String? = null,
     val user: User? = null,
     val selectedEvent: Event? = null,
     val error: String? = null

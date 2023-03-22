@@ -203,7 +203,7 @@ class MainViewModel(
                 }
                 MainEvent.NavigateToClubAddress -> {}
                 is MainEvent.PayByCard -> TODO()
-                is MainEvent.PayByCash -> TODO()
+                is MainEvent.PayLater -> TODO()
                 MainEvent.ClearSelectedEvent -> {
                     _state.update {
                         it.copy(
@@ -214,7 +214,7 @@ class MainViewModel(
                 is MainEvent.RegisterToEvent -> {
                     _state.update {
                         it.copy(
-                            isLoading = true
+                            loadingEventName = event.event.name
                         )
                     }
                     viewModelScope.launch {
@@ -224,15 +224,15 @@ class MainViewModel(
                             )
                             _state.update {
                                 it.copy(
-                                    isLoading = false,
-                                    selectedEvent = event.event,
+                                    loadingEventName = null,
+//                                    selectedEvent = event.event, TODO: After payment works
                                     error = null
                                 )
                             }
                         } catch (e: Exception) {
                             _state.update {
                                 it.copy(
-                                    isLoading = false,
+                                    loadingEventName = null,
                                     error = e.message
                                 )
                             }
@@ -250,7 +250,7 @@ class MainViewModel(
                 is MainEvent.UnregisterFromEvent -> {
                     _state.update {
                         it.copy(
-                            isLoading = true
+                            loadingEventName = event.event.name
                         )
                     }
                     viewModelScope.launch {
@@ -258,8 +258,8 @@ class MainViewModel(
                             eventsInteractor.unregisterFromEvent(event.event)
                             _state.update {
                                 it.copy(
-                                    isLoading = false,
-                                    selectedEvent = event.event,
+                                    loadingEventName = null,
+//                                    selectedEvent = event.event, TODO: After payment works
                                     error = null
                                 )
                             }
@@ -267,7 +267,7 @@ class MainViewModel(
                         } catch (e: Exception) {
                             _state.update {
                                 it.copy(
-                                    isLoading = false,
+                                    loadingEventName = null,
                                     error = e.message
                                 )
                             }

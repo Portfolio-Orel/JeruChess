@@ -201,6 +201,10 @@ updateEventParticipant:
 UPDATE eventParticipantEntity
 SET eventId = ?,
     userId = ?;
+
+clearAllEventsParticipants:
+DELETE FROM eventParticipantEntity;
+
 -- EventParticipants --
 
 -- ChessUserData --
@@ -247,6 +251,9 @@ INSERT OR REPLACE
 deleteGame:
 DELETE FROM gameEntity
 WHERE id = ?;
+
+clearAllGames:
+DELETE FROM gameEntity;
 -- Games --
 
 

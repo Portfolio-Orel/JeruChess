@@ -11,8 +11,8 @@ sealed class MainEvent {
     data class DeleteClub(val clubData: ClubData) : MainEvent()
     data class RegisterToEvent(val event: Event) : MainEvent()
     data class UnregisterFromEvent(val event: Event) : MainEvent()
-    data class PayByCard(val eventId: String) : MainEvent()
-    data class PayByCash(val eventId: String) : MainEvent()
+    data class PayByCard(val event: Event) : MainEvent()
+    data class PayLater(val event: Event) : MainEvent()
     data class SetSelectedEvent(val event: Event) : MainEvent()
     object ClearSelectedEvent : MainEvent()
 

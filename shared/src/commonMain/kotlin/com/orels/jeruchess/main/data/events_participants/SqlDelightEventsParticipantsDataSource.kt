@@ -88,4 +88,8 @@ class SqlDelightEventsParticipantsDataSource(
             .map { it.map { eventParticipantEntity -> eventParticipantEntity.toEventParticipant() } }
             .toCommonFlow()
 
+    override suspend fun clear() {
+        db.clearAllEventsParticipants()
+    }
+
 }

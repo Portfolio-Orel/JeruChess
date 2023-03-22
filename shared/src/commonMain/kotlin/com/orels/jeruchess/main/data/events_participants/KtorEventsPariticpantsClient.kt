@@ -3,6 +3,7 @@ package com.orels.jeruchess.main.data.events_participants
 import com.orels.jeruchess.NetworkConstants
 import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
 import com.orels.jeruchess.main.domain.model.EventParticipant
+import com.orels.jeruchess.main.domain.model.EventsParticipants
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -40,29 +41,24 @@ class KtorEventsParticipantsClient(
                 setBody(eventParticipant.toEventParticipantDto())
                 contentType(ContentType.Application.Json)
             }
-            println()
-            val participants =
-                json.decodeFromString<List<EventParticipantDto>>(result.body())
-                    .map { it.toEventParticipant() }
-            return participants
+            return json.decodeFromString<List<EventParticipantDto>>(result.body())
+                .map { it.toEventParticipant() }
         } catch (e: Exception) {
             throw e
         }
     }
 
-    override suspend fun removeEventParticipants(eventParticipant: List<EventParticipant>) {
+    override suspend fun removeEventParticipants(eventParticipant: List<EventParticipant>): EventsParticipants {
         try {
-            val eventId = eventParticipant.firstOrNull()?.eventId ?: return
+            val eventId = eventParticipant.firstOrNull()?.eventId ?: return emptyList()
             val participantsIds = eventParticipant.map { it.userId }
             val result = httpClient.delete {
                 url("$baseUrl/$eventId/participant_ids?ids=${participantsIds.joinToString(",")}")
                 contentType(ContentType.Application.Json)
                 setBody(eventParticipant.toEventParticipantsDto())
             }
-            println()
-            val eventParticipant =
-                json.decodeFromString<List<EventParticipantDto>>(result.body())
-                    .map { it.toEventParticipant() }
+            return json.decodeFromString<List<EventParticipantDto>>(result.body())
+                .map { it.toEventParticipant() }
         } catch (e: Exception) {
             throw e
         }

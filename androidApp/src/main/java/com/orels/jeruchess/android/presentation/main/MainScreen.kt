@@ -35,6 +35,8 @@ fun MainContent(
             onDismiss = { viewModel.onEvent(MainEvent.ClearSelectedEvent) },
             isRegistered = viewModel.isRegistered(state.selectedEvent!!.id),
             onUnregister = { viewModel.onEvent(MainEvent.UnregisterFromEvent(state.selectedEvent!!)) },
+            onPayByCardClick = { viewModel.onEvent(MainEvent.PayByCard(state.selectedEvent!!)) },
+            onLaterClick = { viewModel.onEvent(MainEvent.PayLater(state.selectedEvent!!)) },
         )
     }
     LazyColumn(
@@ -44,7 +46,7 @@ fun MainContent(
         items(state.events.size) { index ->
             val event = state.events[index]
             val game = state.games.firstOrNull { it.id == event.gameId }
-            val maxRounds = state.events.maxRounds(event.id)
+            val maxRounds = state.events.maxRounds(event.name)
             EventCard(
                 event = event,
                 onRegister = { viewModel.onEvent(MainEvent.RegisterToEvent(it)) },
@@ -54,6 +56,7 @@ fun MainContent(
                 maxRounds = if (maxRounds == 0) 1 else maxRounds,
                 participants = state.eventsParticipants.getEventParticipants(event.id),
                 isRegistered = viewModel.isRegistered(event.id),
+                isLoading = state.loadingEventName == event.name,
             )
         }
     }

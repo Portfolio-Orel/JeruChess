@@ -29,8 +29,11 @@ class EventsInteractorImpl constructor(
             val eventsParticipants =
                 eventsParticipantsClient.getAllEventsParticipants(events.map { it.id })
 
+            gamesDataSource.clear()
             gamesDataSource.insertGames(games)
+            eventsDataSource.clear()
             eventsDataSource.insertEvents(events)
+            eventsParticipantsDataSource.clear()
             eventsParticipantsDataSource.insertEventsParticipants(eventsParticipants)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -58,7 +61,7 @@ class EventsInteractorImpl constructor(
             )
             val eventParticipants = eventsParticipantsClient.addEventParticipant(eventParticipant)
 
-            eventsDataSource.insertEventParticipants(eventParticipants)
+            eventsParticipantsDataSource.insertEventsParticipants(eventParticipants)
         } ?: throw CouldNotFindUserException()
     }
 
@@ -68,8 +71,9 @@ class EventsInteractorImpl constructor(
                 userId = it.id,
                 eventId = event.id
             )
-            eventsParticipantsClient.removeEventParticipants(listOf(eventParticipant))
-            eventsParticipantsDataSource.removeEventParticipants(listOf(eventParticipant))
+            val eventsParticipants =
+                eventsParticipantsClient.removeEventParticipants(listOf(eventParticipant))
+            eventsParticipantsDataSource.removeEventParticipants(eventsParticipants)
         } ?: throw CouldNotFindUserException()
     }
 
