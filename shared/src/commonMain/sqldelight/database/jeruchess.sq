@@ -255,5 +255,3 @@ WHERE id = ?;
 clearAllGames:
 DELETE FROM gameEntity;
 -- Games --
-
-
