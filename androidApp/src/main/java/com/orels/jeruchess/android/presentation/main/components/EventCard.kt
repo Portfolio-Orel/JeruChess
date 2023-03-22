@@ -158,7 +158,7 @@ private fun EventDetails(
                     contentDescription = stringResource(R.string.timer)
                 )
                 Text(
-                    text = "${game.timeStart}+${game.incrementBeforeTimeControl}",
+                    text = "${game.timeStartMin}+${game.incrementBeforeTimeControlSec}",
                     textAlign = TextAlign.Start,
                     style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold),
                 )

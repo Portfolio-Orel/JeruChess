@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 
 @kotlinx.serialization.Serializable
 data class EventParticipantDto(
+    @SerialName("id") val id: String? = null,
     @SerialName("user_id") val userId: String,
     @SerialName("event_id") val eventId: String,
     @SerialName("is_paid") val isPaid: Boolean? = false,
@@ -15,6 +16,7 @@ data class EventParticipantDto(
     @SerialName("is_active") val isActive: Boolean? = true
 ) {
     fun toEventParticipant() = EventParticipant(
+        id = id,
         userId = userId,
         eventId = eventId,
         isPaid = isPaid,
@@ -25,15 +27,19 @@ data class EventParticipantDto(
     )
 }
 
-fun List<EventParticipantDto>.toEventParticipants() = map { it.toEventParticipant() }
+@kotlinx.serialization.Serializable
+data class AddEventParticipantsResponse(
+    @SerialName("ids") val eventParticipantIds: List<String>
+)
 
 fun EventParticipant.toEventParticipantDto() = EventParticipantDto(
+    id = id,
     userId = userId,
     eventId = eventId,
     isPaid = isPaid,
-    paidAmount = paidAmount ?: 0,
-    paidAt = paidAt ?: 0,
-    paymentType = paymentType?.name ?: PaymentType.Cash.name,
+    paidAmount = paidAmount,
+    paidAt = paidAt,
+    paymentType = paymentType?.name,
     isActive = isActive
 )
 

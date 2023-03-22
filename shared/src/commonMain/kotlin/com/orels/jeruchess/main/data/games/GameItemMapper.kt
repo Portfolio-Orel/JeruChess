@@ -6,10 +6,10 @@ import database.GameEntity
 
 fun GameEntity.toGame() = Game(
     id = id,
-    timeStart = timeStartMin,
-    incrementBeforeTimeControl = incrementBeforeTimeControl,
+    timeStartMin = timeStartMin,
+    incrementBeforeTimeControlSec = incrementBeforeTimeControlSec,
     movesNumToTimeControl = movesNumToTimeControl,
-    timeBumpAfterTimeControl = timeBumpAfterTimeControl,
-    incrementAfterTimeControl = incrementAfterTimeControl,
+    timeBumpAfterTimeControlMin = timeBumpAfterTimeControlMin,
+    incrementAfterTimeControlSec = incrementAfterTimeControlSec,
     type = GameType.valueOf(type)
 )

@@ -5,18 +5,22 @@ enum class Currency {
     USD,
 }
 
+typealias Events = List<Event>
+
 data class Event(
     var id: String,
     var name: String,
     var description: String,
     var date: Long,
-    var price: Long,
+    var price: Float,
     var currency: Currency = Currency.ILS,
     var roundNumber: Int,
     var eventType: String,
     var eventFormat: String,
     var isRatingIsrael: Boolean,
     var isRatingFide: Boolean,
-    var ratingType: String,
     var gameId: String
 )
+
+val Events.ids: List<String>
+get() = map { it.id }

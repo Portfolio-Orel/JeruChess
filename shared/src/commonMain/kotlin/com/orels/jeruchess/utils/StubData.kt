@@ -11,9 +11,9 @@ class StubData {
             return (lastYear..now).random()
         }
 
-        val Events: List<Event>
+        val Events: Events
             get() {
-                val list: List<Event> = (0..9).map {
+                val list: Events = (0..9).map {
                     Event(
                         id = (it % 3).toString(),
                         name = when (it % 3) {
@@ -27,7 +27,7 @@ class StubData {
                             else -> "4 + 3 chess game."
                         },
                         date = getRandomDateFromLastYear(),
-                        price = 60L + it % 3,
+                        price = (60L + it % 3).toFloat(),
                         currency = Currency.ILS,
                         roundNumber = 1,
                         eventType = "Tournament",
@@ -39,11 +39,6 @@ class StubData {
                         },
                         isRatingIsrael = it % 3 == 0,
                         isRatingFide = it % 3 == 0,
-                        ratingType = when (it % 3) {
-                            0 -> "Standard"
-                            1 -> "Rapid"
-                            else -> "Blitz"
-                        },
                         gameId = (it % 4).toString()
                     )
                 }.sortedBy { it.date }
@@ -75,26 +70,26 @@ class StubData {
         val Games = (0..3).map {
             Game(
                 id = it.toString(),
-                timeStart = when (it) {
+                timeStartMin = when (it) {
                     0 -> 3L
                     1 -> 15L
                     2 -> 50L
                     else -> 60L
                 },
-                incrementBeforeTimeControl = when (it) {
+                incrementBeforeTimeControlSec = when (it) {
                     0 -> 2L
                     1 -> 5L
                     2 -> 10L
                     else -> 30L
                 },
                 movesNumToTimeControl = 0,
-                timeBumpAfterTimeControl = 0,
-                incrementAfterTimeControl = 0,
+                timeBumpAfterTimeControlMin = 0,
+                incrementAfterTimeControlSec = 0,
                 type = when (it) {
                     0 -> GameType.BLITZ
                     1 -> GameType.RAPID
-                    2 -> GameType.CLASSIC
-                    else -> GameType.CLASSIC
+                    2 -> GameType.CLASSICAL
+                    else -> GameType.CLASSICAL
                 }
             )
         }

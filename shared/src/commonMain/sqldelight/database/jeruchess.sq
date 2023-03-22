@@ -15,14 +15,13 @@ CREATE TABLE eventEntity(
     name TEXT NOT NULL,
     description TEXT NOT NULL,
     date INTEGER NOT NULL,
-    price INTEGER NOT NULL,
+    price TEXT NOT NULL,
     currency TEXT NOT NULL,
     roundNumber INTEGER NOT NULL,
     eventType TEXT NOT NULL,
     eventFormat TEXT NOT NULL,
     isRatingIsrael INTEGER NOT NULL,
     isRatingFide INTEGER NOT NULL,
-    ratingType TEXT NOT NULL,
     gameId TEXT NOT NULL,
     FOREIGN KEY(gameId) REFERENCES gameEntity(id)
 );
@@ -35,6 +34,7 @@ CREATE TABLE chessUserDataEntity(
 );
 
 CREATE TABLE eventParticipantEntity(
+    id TEXT NOT NULL PRIMARY KEY,
     eventId TEXT NOT NULL,
     userId TEXT NOT NULL,
     isPaid INTEGER NOT NULL,
@@ -59,10 +59,10 @@ CREATE TABLE clubDataEntity(
 CREATE TABLE gameEntity(
     id TEXT NOT NULL PRIMARY KEY,
     timeStartMin INTEGER NOT NULL,
-    incrementBeforeTimeControl INTEGER NOT NULL,
+    incrementBeforeTimeControlSec INTEGER NOT NULL,
     movesNumToTimeControl INTEGER,
-    timeBumpAfterTimeControl INTEGER,
-    incrementAfterTimeControl INTEGER,
+    timeBumpAfterTimeControlMin INTEGER,
+    incrementAfterTimeControlSec INTEGER,
     type TEXT NOT NULL
 );
 
@@ -140,9 +140,8 @@ INSERT OR REPLACE
     eventFormat,
     isRatingIsrael,
     isRatingFide,
-    ratingType,
     gameId
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteEvent:
 DELETE FROM eventEntity
@@ -172,9 +171,15 @@ SELECT *
 FROM eventParticipantEntity
 WHERE eventId = ?;
 
+getEventParticipant:
+SELECT *
+FROM eventParticipantEntity
+WHERE userId = ? AND eventId = ?;
+
 insertEventParticipant:
 INSERT OR REPLACE
  INTO eventParticipantEntity (
+    id,
     eventId,
     userId,
     isPaid,
@@ -182,7 +187,11 @@ INSERT OR REPLACE
     paidAmount,
     paymentType,
     isActive
-) VALUES (?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+getAllEventsParticipants:
+SELECT *
+FROM eventParticipantEntity;
 
 deleteEventParticipant:
 DELETE FROM eventParticipantEntity
@@ -218,5 +227,26 @@ SET rating = ?,
 WHERE userId = ?;
 -- ChessUserData --
 
+-- Games --
+getAllGames:
+SELECT *
+FROM gameEntity;
+
+insertGame:
+INSERT OR REPLACE
+ INTO gameEntity (
+    id,
+    timeStartMin,
+    incrementBeforeTimeControlSec,
+    movesNumToTimeControl,
+    timeBumpAfterTimeControlMin,
+    incrementAfterTimeControlSec,
+    type
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteGame:
+DELETE FROM gameEntity
+WHERE id = ?;
+-- Games --
 
 

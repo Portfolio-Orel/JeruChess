@@ -12,7 +12,6 @@ import com.orels.jeruchess.core.data.interactor.EventsInteractorImpl
 import com.orels.jeruchess.core.data.local.DatabaseDriverFactory
 import com.orels.jeruchess.core.data.remote.HttpClientFactory
 import com.orels.jeruchess.core.domain.interactors.EventsInteractor
-import com.orels.jeruchess.core.domain.interactors.UserInteractor
 import com.orels.jeruchess.database.JeruChessDatabase
 import com.orels.jeruchess.main.data.chess_user_data.KtorChessUserDataClient
 import com.orels.jeruchess.main.data.chess_user_data.SqlDelightChessUserDataDataSource
@@ -180,14 +179,18 @@ object AppModule {
         eventsClient: EventsClient,
         eventsParticipantsClient: EventsParticipantsClient,
         eventsParticipantsDataSource: EventsParticipantsDataSource,
-        userInteractor: UserInteractor
+        gamesClient: GamesClient,
+        gamesDataSource: GamesDataSource,
+        usersDataSource: UsersDataSource,
 
     ): EventsInteractor = EventsInteractorImpl(
         eventsDataSource = eventsDataSource,
         eventsClient = eventsClient,
         eventsParticipantsClient = eventsParticipantsClient,
         eventsParticipantsDataSource = eventsParticipantsDataSource,
-        userInteractor = userInteractor
+        gamesClient = gamesClient,
+        gamesDataSource = gamesDataSource,
+        usersDataSource = usersDataSource,
     )
 
 }

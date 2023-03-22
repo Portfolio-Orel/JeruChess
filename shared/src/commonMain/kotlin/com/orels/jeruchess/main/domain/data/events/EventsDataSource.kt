@@ -1,13 +1,13 @@
 package com.orels.jeruchess.main.domain.data.events
 
-import com.orels.jeruchess.main.domain.model.Event
+import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.model.EventParticipant
-
-typealias Events = List<Event>
+import com.orels.jeruchess.main.domain.model.Events
 
 interface EventsDataSource {
-    suspend fun getAllEvents(): List<Event>
-    suspend fun registerToEvent(eventParticipant: EventParticipant)
-    suspend fun addEvents(events: Events)
+    suspend fun getAllEvents(): Events
+    suspend fun insertEventParticipants(eventParticipants: List<EventParticipant>)
+    suspend fun insertEvents(events: Events)
+    suspend fun getEventsFlow(): CommonFlow<Events>
     suspend fun clear()
 }

@@ -2,41 +2,42 @@ package com.orels.jeruchess.core.data.interactor
 
 import com.orels.jeruchess.core.domain.exceptions.CouldNotFindUserException
 import com.orels.jeruchess.core.domain.interactors.EventsInteractor
-import com.orels.jeruchess.core.domain.interactors.UserInteractor
+import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.data.events.EventsClient
 import com.orels.jeruchess.main.domain.data.events.EventsDataSource
 import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsClient
 import com.orels.jeruchess.main.domain.data.events_participants.EventsParticipantsDataSource
-import com.orels.jeruchess.main.domain.model.Event
-import com.orels.jeruchess.main.domain.model.EventParticipant
-import com.orels.jeruchess.main.domain.model.PaymentType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.orels.jeruchess.main.domain.data.games.GamesClient
+import com.orels.jeruchess.main.domain.data.games.GamesDataSource
+import com.orels.jeruchess.main.domain.data.users.UsersDataSource
+import com.orels.jeruchess.main.domain.model.*
 
 class EventsInteractorImpl constructor(
-    private val eventsDataSource: EventsDataSource,
     private val eventsClient: EventsClient,
+    private val eventsDataSource: EventsDataSource,
     private val eventsParticipantsClient: EventsParticipantsClient,
     private val eventsParticipantsDataSource: EventsParticipantsDataSource,
-    private val userInteractor: UserInteractor
+    private val gamesClient: GamesClient,
+    private val gamesDataSource: GamesDataSource,
+    private val usersDataSource: UsersDataSource,
 ) : EventsInteractor {
-    override suspend fun getAllEvents(): List<Event> {
-//        eventsDataSource
-        return emptyList()
-    }
+    override suspend fun initData(
+    ) {
+        try {
+            val events = eventsClient.getAllEvents()
+            val games = gamesClient.getGamesByEventIds(events.map { it.id })
+            val eventsParticipants =
+                eventsParticipantsClient.getAllEventsParticipants(events.map { it.id })
 
-    init {
-        CoroutineScope(Dispatchers.Unconfined).launch {
-            eventsClient.getAllEvents().let { events ->
-                eventsDataSource.addEvents(events)
-                eventsParticipantsClient.getAllEventsParticipants(events.map { it.id }).let {
-                    eventsParticipantsDataSource.addEventParticipants(it)
-                }
-            }
+            gamesDataSource.insertGames(games)
+            eventsDataSource.insertEvents(events)
+            eventsParticipantsDataSource.insertEventsParticipants(eventsParticipants)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
     }
+
+    override suspend fun getAllEvents(): List<Event> = eventsDataSource.getAllEvents()
 
     override suspend fun registerToEvent(
         event: Event,
@@ -45,7 +46,7 @@ class EventsInteractorImpl constructor(
         paidAmount: Long?,
         paymentType: PaymentType?
     ) {
-        userInteractor.getCachedUser()?.let {
+        usersDataSource.getUser()?.let {
             val eventParticipant = EventParticipant(
                 userId = it.id,
                 eventId = event.id,
@@ -55,14 +56,29 @@ class EventsInteractorImpl constructor(
                 paymentType = paymentType,
                 isActive = true
             )
-            eventsParticipantsClient.addEventParticipants(
-                listOf(eventParticipant)
-            )
-            eventsDataSource.registerToEvent(eventParticipant)
+            val eventParticipants = eventsParticipantsClient.addEventParticipant(eventParticipant)
+
+            eventsDataSource.insertEventParticipants(eventParticipants)
         } ?: throw CouldNotFindUserException()
     }
 
-    override suspend fun getAllEventsParticipants(eventId: String): List<EventParticipant> =
-        eventsParticipantsDataSource.getAllEventsParticipants(eventId)
+    override suspend fun unregisterFromEvent(event: Event) {
+        usersDataSource.getUser()?.let {
+            val eventParticipant = eventsParticipantsDataSource.getEventParticipant(
+                userId = it.id,
+                eventId = event.id
+            )
+            eventsParticipantsClient.removeEventParticipants(listOf(eventParticipant))
+            eventsParticipantsDataSource.removeEventParticipants(listOf(eventParticipant))
+        } ?: throw CouldNotFindUserException()
+    }
 
+    override suspend fun getAllEventsParticipants(): EventsParticipants =
+        eventsParticipantsDataSource.getAllEventsParticipants()
+
+    override suspend fun getEventsFlow(): CommonFlow<Events> =
+        eventsDataSource.getEventsFlow()
+
+    override suspend fun getEventsParticipantsFlow(): CommonFlow<EventsParticipants> =
+        eventsParticipantsDataSource.getEventsParticipantsFlow()
 }

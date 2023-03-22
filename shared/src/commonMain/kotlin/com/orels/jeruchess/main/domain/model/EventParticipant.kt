@@ -5,7 +5,9 @@ enum class PaymentType {
     Card
 }
 
+typealias EventsParticipants = List<EventParticipant>
 data class EventParticipant(
+    var id: String? = null,
     var eventId: String,
     var userId: String,
     var isPaid: Boolean? = false,

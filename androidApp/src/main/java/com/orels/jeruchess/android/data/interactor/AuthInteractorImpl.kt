@@ -144,18 +144,16 @@ class AuthInteractorImpl @Inject constructor(
 
     private suspend fun loginWithGoogle(activity: Activity) {
         try {
-            Amplify.Auth.signOut()
             Amplify.Auth.signInWithSocialWebUI(
                 AuthProvider.google(),
                 activity
             )
             userLoggedIn()
         } catch (error: AmplifyException) {
-//            handleError(error)
+            handleError(error)
             throw error
         } catch (error: Exception) {
             throw error
-            // TODO
         }
     }
 
@@ -174,15 +172,15 @@ class AuthInteractorImpl @Inject constructor(
 
     private suspend fun userLoggedIn() {
         try {
-        val userId = Amplify.Auth.getCurrentUser().userId
-        val email = Amplify.Auth.fetchUserAttributes()
-            .firstOrNull { it.key == AuthUserAttributeKey.email() }?.value
+            val userId = Amplify.Auth.getCurrentUser().userId
+            val email = Amplify.Auth.fetchUserAttributes()
+                .firstOrNull { it.key == AuthUserAttributeKey.email() }?.value
             setUser()
-        if (isUserRegistered(userId)) {
-            setAuthState(AuthState.LoggedIn)
-        } else {
-            setAuthState(AuthState.RegistrationRequired(), mapOf("email" to email.toString()))
-        }
+            if (isUserRegistered(userId)) {
+                setAuthState(AuthState.LoggedIn)
+            } else {
+                setAuthState(AuthState.RegistrationRequired(), mapOf("email" to email.toString()))
+            }
         } catch (error: AmplifyException) {
             handleError(error)
         } catch (error: Exception) {
@@ -201,6 +199,7 @@ class AuthInteractorImpl @Inject constructor(
         } catch (error: AmplifyException) {
             handleError(error)
         } catch (error: Exception) {
+            println()
             // TODO
         }
     }
