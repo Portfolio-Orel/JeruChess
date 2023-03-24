@@ -68,9 +68,9 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideDatabaseDriver(app: Application): SqlDriver {
-        return DatabaseDriverFactory(app).create()
-    }
+    // Provide a driver for your database, with version 1.
+    fun provideDatabaseDriver(app: Application): SqlDriver =
+        DatabaseDriverFactory(app).create()
 
     @Provides
     @Singleton

@@ -40,6 +40,17 @@
                             ]
                         },
                         "authenticationFlowType": "USER_SRP_AUTH",
+                        "mfaConfiguration": "OFF",
+                        "mfaTypes": [
+                            "SMS"
+                        ],
+                        "passwordProtectionSettings": {
+                            "passwordPolicyMinLength": 8,
+                            "passwordPolicyCharacters": []
+                        },
+                        "signupAttributes": [
+                            "EMAIL"
+                        ],
                         "socialProviders": [
                             "GOOGLE"
                         ],
@@ -47,19 +58,8 @@
                             "EMAIL",
                             "PHONE_NUMBER"
                         ],
-                        "signupAttributes": [
-                            "EMAIL"
-                        ],
-                        "passwordProtectionSettings": {
-                            "passwordPolicyMinLength": 8,
-                            "passwordPolicyCharacters": []
-                        },
-                        "mfaConfiguration": "OFF",
-                        "mfaTypes": [
-                            "SMS"
-                        ],
                         "verificationMechanisms": [
-                            "EMAIL"
+                            "PHONE_NUMBER"
                         ]
                     }
                 }

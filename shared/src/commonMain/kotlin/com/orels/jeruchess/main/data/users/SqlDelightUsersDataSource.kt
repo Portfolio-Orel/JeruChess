@@ -13,7 +13,9 @@ class SqlDelightUsersDataSource(
 ) : UsersDataSource {
     private val usersQueries = db.jeruchessQueries
     override suspend fun saveUser(user: User) {
-        usersQueries.deleteUser()
+        if(usersQueries.getUser().executeAsOneOrNull() != null) {
+            usersQueries.deleteUser()
+        }
         usersQueries.insertUser(
             id = user.id,
             firstName = user.firstName,

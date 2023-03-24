@@ -23,7 +23,7 @@
           "PHONE_NUMBER"
         ],
         "verificationMechanisms": [
-          "EMAIL"
+          "PHONE_NUMBER"
         ]
       },
       "providerPlugin": "awscloudformation",

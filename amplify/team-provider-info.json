@@ -1,7 +1,4 @@
 {
-  "dev": {
-    "awscloudformation": {}
-  },
   "deve": {
     "awscloudformation": {
       "AuthRoleName": "amplify-chessapp-deve-94142-authRole",

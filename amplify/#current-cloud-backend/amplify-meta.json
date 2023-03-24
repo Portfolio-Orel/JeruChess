@@ -14,11 +14,20 @@
   },
   "auth": {
     "chessapp5563c474": {
-      "service": "Cognito",
-      "providerPlugin": "awscloudformation",
-      "dependsOn": [],
       "customAuth": false,
+      "dependsOn": [],
       "frontendAuthConfig": {
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "signupAttributes": [
+          "EMAIL"
+        ],
         "socialProviders": [
           "GOOGLE"
         ],
@@ -26,26 +35,12 @@
           "EMAIL",
           "PHONE_NUMBER"
         ],
-        "signupAttributes": [
-          "EMAIL"
-        ],
-        "passwordProtectionSettings": {
-          "passwordPolicyMinLength": 8,
-          "passwordPolicyCharacters": []
-        },
-        "mfaConfiguration": "OFF",
-        "mfaTypes": [
-          "SMS"
-        ],
         "verificationMechanisms": [
-          "EMAIL"
+          "PHONE_NUMBER"
         ]
       },
-      "providerMetadata": {
-        "s3TemplateURL": "https://s3.amazonaws.com/amplify-chessapp-deve-94142-deployment/amplify-cfn-templates/auth/chessapp5563c474-cloudformation-template.json",
-        "logicalId": "authchessapp5563c474"
-      },
-      "lastPushTimeStamp": "2023-02-17T08:52:05.639Z",
+      "providerPlugin": "awscloudformation",
+      "service": "Cognito",
       "output": {
         "CreatedSNSRole": "arn:aws:iam::965255944696:role/sns5563c47494142-deve",
         "UserPoolId": "us-east-1_yQHoJ14ct",
@@ -58,7 +53,12 @@
         "OAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"myapp://callback/\"],\"LogoutURLs\":[\"myapp://signout/\"]}",
         "UserPoolName": "chessapp5563c474_userpool_5563c474"
       },
-      "lastPushDirHash": "8/j6wWPV+N8CJHkRW4RO2FOrJ6c="
+      "lastPushTimeStamp": "2023-03-07T19:55:05.974Z",
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-chessapp-deve-94142-deployment/amplify-cfn-templates/auth/chessapp5563c474-cloudformation-template.json",
+        "logicalId": "authchessapp5563c474"
+      },
+      "lastPushDirHash": "z9NXWFna22ZkcSl2tfUtNmupKfU="
     }
   }
 }
