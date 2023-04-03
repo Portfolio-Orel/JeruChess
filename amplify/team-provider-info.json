@@ -17,6 +17,9 @@
     "categories": {
       "auth": {
         "chessapp5563c474": {}
+      },
+      "function": {
+        "chessapp5563c474CreateAuthChallenge": {}
       }
     }
   }

@@ -159,15 +159,6 @@ fun LoginScreen(
                         )
                     }
                 }
-                GoogleButton(onClick = {
-                    (context as? Activity)?.let {
-                        viewModel.onEvent(
-                            LoginEvent.LoginWithGoogle(
-                                activity = it,
-                            )
-                        )
-                    }
-                })
                 Text(
                     text = state.error ?: "",
                     style = MaterialTheme.typography.body2,

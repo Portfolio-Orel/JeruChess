@@ -12,8 +12,7 @@ fun EventEntity.toEvent() = Event(
     price = price.toFloatOrNull() ?: throw Exception("price is not a float"),
     currency = Currency.valueOf(currency.uppercase()),
     roundNumber = roundNumber.toInt(),
-    eventType = eventType,
-    eventFormat = eventFormat,
+    gameFormatId = gameFormatId,
     isRatingIsrael = isRatingIsrael == 1L,
     isRatingFide = isRatingFide == 1L,
     gameId = gameId

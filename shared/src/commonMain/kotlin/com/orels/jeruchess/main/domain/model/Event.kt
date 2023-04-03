@@ -15,12 +15,8 @@ data class Event(
     var price: Float,
     var currency: Currency = Currency.ILS,
     var roundNumber: Int,
-    var eventType: String,
-    var eventFormat: String,
+    var gameFormatId: String,
     var isRatingIsrael: Boolean,
     var isRatingFide: Boolean,
     var gameId: String
 )
-
-val Events.ids: List<String>
-get() = map { it.id }

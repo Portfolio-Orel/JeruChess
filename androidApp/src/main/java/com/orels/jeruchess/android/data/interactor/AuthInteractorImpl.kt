@@ -1,6 +1,5 @@
 package com.orels.jeruchess.android.data.interactor
 
-import android.app.Activity
 import android.content.Context
 import android.telephony.PhoneNumberUtils
 import android.util.Log
@@ -8,15 +7,14 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.amplifyframework.AmplifyException
-import com.amplifyframework.auth.AuthProvider
 import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
 import com.amplifyframework.auth.cognito.exceptions.service.UsernameExistsException
 import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
-import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignUpOptions
 import com.amplifyframework.auth.cognito.options.AuthFlowType
+import com.amplifyframework.auth.options.AuthSignUpOptions
 import com.amplifyframework.core.AmplifyConfiguration
 import com.amplifyframework.kotlin.core.Amplify
 import com.orels.jeruchess.android.domain.AuthEvent
@@ -36,7 +34,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.util.*
 import javax.inject.Inject
 
 class AuthInteractorImpl @Inject constructor(
@@ -75,7 +72,7 @@ class AuthInteractorImpl @Inject constructor(
             context
         )
         isConfigured = true
-
+        logout()
         if (!isUserLoggedIn()) {
             usersDataSource.clearUser()
             setAuthState(AuthState.LoggedOut)
@@ -84,52 +81,44 @@ class AuthInteractorImpl @Inject constructor(
         }
     }
 
-    private suspend fun loginWithPhone(phoneNumber: String) {
+    private suspend fun confirmSignIn(code: String) {
         try {
-            val options = AWSCognitoAuthSignInOptions.builder()
-                .authFlowType(AuthFlowType.CUSTOM_AUTH_WITHOUT_SRP)
-                .build()
-            Amplify.Auth.signIn()
+            Amplify.Auth.confirmSignIn(code)
             userLoggedIn()
         } catch (error: AmplifyException) {
             handleError(error)
         } catch (error: Exception) {
-            // TODO
+            throw error
+        }
+    }
+
+    private suspend fun loginWithPhone(phoneNumber: String) {
+        try {
+            val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
+            val authSignInOptions = AWSCognitoAuthSignInOptions.builder()
+                .authFlowType(AuthFlowType.CUSTOM_AUTH_WITHOUT_SRP)
+                .build()
+            Amplify.Auth.signIn(formattedPhoneNumber, options = authSignInOptions)
+        } catch (error: AmplifyException) {
+            handleError(error)
+        } catch (error: Exception) {
+            println()
         }
     }
 
     private suspend fun register(user: User) {
         val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(user.phoneNumber, "IL")
-        val signUpOptions = AWSCognitoAuthSignUpOptions.builder()
-            .userAttribute(AuthUserAttributeKey.phoneNumberVerified(), formattedPhoneNumber)
+        val signUpOptions = AuthSignUpOptions.builder()
             .userAttribute(AuthUserAttributeKey.phoneNumber(), formattedPhoneNumber)
             .userAttribute(AuthUserAttributeKey.email(), user.email)
-            .userAttribute(AuthUserAttributeKey.birthdate(), Date(user.dateOfBirth).toString())
-            .userAttribute(AuthUserAttributeKey.name(), user.firstName)
-            .userAttribute(AuthUserAttributeKey.familyName(), user.lastName)
             .build()
 
 
         try {
             Amplify.Auth.signUp(
-                user.email,
+                formattedPhoneNumber,
                 PasswordGenerator.generateStrongPassword(),
                 signUpOptions
-            )
-            val userId = Amplify.Auth.getCurrentUser().userId
-            val token =
-                (Amplify.Auth.fetchAuthSession() as AWSCognitoAuthSession).userPoolTokensResult.value?.accessToken
-            if (token == null) {
-                logout()
-                return
-            }
-            user.id = userId
-            user.token = token
-            usersClient.createUser(user)
-            usersDataSource.saveUser(user)
-            setAuthState(
-                AuthState.ConfirmationRequired(),
-                mapOf("email" to user.email, "phoneNumber" to user.phoneNumber)
             )
         } catch (error: AmplifyException) {
             if (error is UsernameExistsException) {
@@ -138,22 +127,7 @@ class AuthInteractorImpl @Inject constructor(
                 handleError(error)
             }
         } catch (error: Exception) {
-            // TODO
-        }
-    }
-
-    private suspend fun loginWithGoogle(activity: Activity) {
-        try {
-            Amplify.Auth.signInWithSocialWebUI(
-                AuthProvider.google(),
-                activity
-            )
-            userLoggedIn()
-        } catch (error: AmplifyException) {
-            handleError(error)
-            throw error
-        } catch (error: Exception) {
-            throw error
+            println()
         }
     }
 
@@ -188,11 +162,24 @@ class AuthInteractorImpl @Inject constructor(
         }
     }
 
-    private suspend fun confirmCode(code: String) {
+    private suspend fun confirmSignUp(user: User, code: String) {
         try {
-            Amplify.Auth.confirmSignUp(
-                Amplify.Auth.getCurrentUser().username,
-                code
+            val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(user.phoneNumber, "IL")
+            Amplify.Auth.confirmSignUp(formattedPhoneNumber, code)
+            val userId = Amplify.Auth.getCurrentUser().userId
+            val token =
+                (Amplify.Auth.fetchAuthSession() as AWSCognitoAuthSession).userPoolTokensResult.value?.accessToken
+            if (token == null) {
+                logout()
+                return
+            }
+            user.id = userId
+            user.token = token
+            usersClient.createUser(user)
+            usersDataSource.saveUser(user)
+            setAuthState(
+                AuthState.ConfirmationRequired(),
+                mapOf("email" to user.email, "phoneNumber" to user.phoneNumber)
             )
             setUser()
             setAuthState(AuthState.LoggedIn)
@@ -200,7 +187,6 @@ class AuthInteractorImpl @Inject constructor(
             handleError(error)
         } catch (error: Exception) {
             println()
-            // TODO
         }
     }
 
@@ -225,9 +211,9 @@ class AuthInteractorImpl @Inject constructor(
 
     override suspend fun onAuth(authEvent: AuthEvent) {
         when (authEvent) {
-            is AuthEvent.LoginWithGoogle -> loginWithGoogle(authEvent.activity)
             is AuthEvent.LoginWithPhone -> loginWithPhone(authEvent.phoneNumber)
-            is AuthEvent.ConfirmCode -> confirmCode(authEvent.code)
+            is AuthEvent.ConfirmSignUp -> confirmSignUp(user = authEvent.user, code = authEvent.code)
+            is AuthEvent.ConfirmSignIn -> confirmSignIn(authEvent.code)
             is AuthEvent.Register -> register(authEvent.user)
             is AuthEvent.Logout -> logout()
         }
@@ -242,12 +228,7 @@ class AuthInteractorImpl @Inject constructor(
 
 
     override suspend fun isUserRegistered(userId: String): Boolean =
-        try {
-            usersClient.getUser(userId) != null
-        } catch (e: Exception) {
-            throw e
-//            false
-        }
+        usersClient.getUser(userId) != null
 
     override suspend fun saveUser(user: User) = usersDataSource.saveUser(user)
     override suspend fun getUser(): User? = usersDataSource.getUser()

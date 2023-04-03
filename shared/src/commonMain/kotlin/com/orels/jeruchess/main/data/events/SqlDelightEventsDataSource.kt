@@ -33,8 +33,7 @@ class SqlDelightEventsDataSource(
                     price = it.price.toFloatOrNull() ?: throw Exception("price is not a float"),
                     currency = Currency.valueOf(it.currency),
                     roundNumber = it.roundNumber.toInt(),
-                    eventType = it.eventType,
-                    eventFormat = it.eventFormat,
+                    gameFormatId = it.gameFormatId,
                     isRatingIsrael = it.isRatingIsrael.toBoolean(),
                     isRatingFide = it.isRatingFide.toBoolean(),
                     gameId = it.gameId
@@ -76,8 +75,7 @@ class SqlDelightEventsDataSource(
                     price = price.toString(),
                     currency = currency.name,
                     roundNumber = roundNumber.toLong(),
-                    eventType = eventType,
-                    eventFormat = eventFormat,
+                    gameFormatId = gameFormatId,
                     isRatingIsrael = isRatingIsrael.toLong(),
                     isRatingFide = isRatingFide.toLong(),
                     gameId = gameId

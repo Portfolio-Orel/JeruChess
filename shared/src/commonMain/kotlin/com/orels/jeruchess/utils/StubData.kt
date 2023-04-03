@@ -30,8 +30,7 @@ class StubData {
                         price = (60L + it % 3).toFloat(),
                         currency = Currency.ILS,
                         roundNumber = 1,
-                        eventType = "Tournament",
-                        eventFormat = when (it % 3) {
+                        gameFormatId = when (it % 3) {
                             0 -> "Swiss"
                             1 -> "Scheveningen"
                             2 -> "GroupDuel"

@@ -32,35 +32,39 @@ class RegisterViewModel @Inject constructor(
             is RegisterEvent.SetDateOfBirth -> state = state.copy(dateOfBirth = event.dateOfBirth)
             is RegisterEvent.Register -> register()
             is RegisterEvent.CompleteRegistration -> register()
-            is RegisterEvent.ConfirmCode -> confirmCode()
+            is RegisterEvent.ConfirmCode -> confirmCode(event.code)
         }
 
 
-    private fun confirmCode() {
+    private fun confirmCode(code: String) {
+        state = state.copy(isLoading = true)
         viewModelScope.launch {
             authInteractor.onAuth(
-                AuthEvent.ConfirmCode(
-                    code = state.code,
+                AuthEvent.ConfirmSignUp(
+                    user = state.user,
+                    code = code,
                 )
             )
+            withContext(Dispatchers.Main) {
+                state = state.copy(isLoading = false)
+            }
         }
     }
 
     private fun register() {
         viewModelScope.launch {
-            state = state.copy(isLoading = true)
+            val user = User(
+                phoneNumber = state.phoneNumber,
+                playerNumber = state.playerNumber,
+                firstName = state.firstName,
+                lastName = state.lastName,
+                gender = state.gender,
+                email = state.email,
+                dateOfBirth = state.dateOfBirth
+            )
+            state = state.copy(isLoading = true, user = user)
             authInteractor.onAuth(
-                AuthEvent.Register(
-                    user = User(
-                        phoneNumber = state.phoneNumber,
-                        playerNumber = state.playerNumber,
-                        firstName = state.firstName,
-                        lastName = state.lastName,
-                        gender = state.gender,
-                        email = state.email,
-                        dateOfBirth = state.dateOfBirth
-                    )
-                )
+                AuthEvent.Register(user = user)
             )
             withContext(Dispatchers.Main) {
                 state = state.copy(isLoading = false)

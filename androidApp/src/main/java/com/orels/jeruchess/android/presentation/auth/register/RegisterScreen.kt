@@ -53,9 +53,9 @@ private enum class Stage {
 
 // this will show the stages order, not as a string
 private val registrationProcess: List<Stage> = listOf(
-    Stage.BASIC_INFORMATION,
     Stage.EMAIL_NUMBER,
     Stage.CONFIRMATION,
+    Stage.BASIC_INFORMATION,
     Stage.DONE
 )
 
@@ -87,7 +87,7 @@ fun RegisterScreen(
     var backPressed by remember { mutableStateOf(false) }
 
     val state = viewModel.state
-    val stage = remember { mutableStateOf(Stage.BASIC_INFORMATION) }
+    val stage = remember { mutableStateOf(registrationProcess[0]) }
 
     LaunchedEffect(key1 = preInsertedEmail) {
         if (preInsertedEmail.isNotBlank() && preInsertedEmail != Screens.navigationArgumentDefaultValue)
@@ -329,6 +329,7 @@ fun GetEmailAndPhoneNumber(
             onTextChange = {
                 number.value = it
             },
+            keyboardType = CustomKeyboardType.Phone,
             isDisabled = isPhoneNumberDisabled
         )
 
@@ -398,7 +399,7 @@ fun ConfirmationCodeDialog(
                         .focusRequester(focusRequesters[i]),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number,
+                        keyboardType = KeyboardType.Phone,
                         imeAction = if (i < codeInputs - 1) ImeAction.Next else ImeAction.Done
                     ),
                     keyboardActions = KeyboardActions(onNext = {

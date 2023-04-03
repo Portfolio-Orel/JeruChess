@@ -58,7 +58,7 @@ object AppModule {
     @Singleton
     fun provideHttpClient(
         @BaseUrl baseUrl: String,
-       dataSource: UsersDataSource
+        dataSource: UsersDataSource
     ): HttpClient = HttpClientFactory()
         .create(
             baseUrl = baseUrl,
@@ -183,7 +183,7 @@ object AppModule {
         gamesDataSource: GamesDataSource,
         usersDataSource: UsersDataSource,
 
-    ): EventsInteractor = EventsInteractorImpl(
+        ): EventsInteractor = EventsInteractorImpl(
         eventsDataSource = eventsDataSource,
         eventsClient = eventsClient,
         eventsParticipantsClient = eventsParticipantsClient,

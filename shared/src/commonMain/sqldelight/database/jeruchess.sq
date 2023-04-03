@@ -18,8 +18,7 @@ CREATE TABLE eventEntity(
     price TEXT NOT NULL,
     currency TEXT NOT NULL,
     roundNumber INTEGER NOT NULL,
-    eventType TEXT NOT NULL,
-    eventFormat TEXT NOT NULL,
+    gameFormatId TEXT NOT NULL,
     isRatingIsrael INTEGER NOT NULL,
     isRatingFide INTEGER NOT NULL,
     gameId TEXT NOT NULL,
@@ -136,12 +135,11 @@ INSERT OR REPLACE
     price,
     currency,
     roundNumber,
-    eventType,
-    eventFormat,
+    gameFormatId,
     isRatingIsrael,
     isRatingFide,
     gameId
-) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteEvent:
 DELETE FROM eventEntity
@@ -155,8 +153,7 @@ SET name = ?,
     price = ?,
     currency = ?,
     roundNumber = ?,
-    eventType = ?,
-    eventFormat = ?,
+    gameFormatId = ?,
     isRatingIsrael = ?,
     isRatingFide = ?
 WHERE id = ?;

@@ -1,6 +1,5 @@
 package com.orels.jeruchess.android.presentation.auth.login
 
-import android.app.Activity
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -33,12 +32,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun loginWithGoogle(activity: Activity) {
-        viewModelScope.launch {
-            authInteractor.onAuth(AuthEvent.LoginWithGoogle(activity))
-        }
-    }
-
     private fun loginWithPhone(phoneNumber: String) {
         state = state.copy(isLoadingLogin = true)
         viewModelScope.launch {
@@ -55,7 +48,6 @@ class LoginViewModel @Inject constructor(
 
     fun onEvent(event: LoginEvent) {
         when (event) {
-            is LoginEvent.LoginWithGoogle -> loginWithGoogle(event.activity)
             is LoginEvent.Login -> loginWithPhone(event.phoneNumber)
             is LoginEvent.Register -> state =
                 state.copy(authState = AuthState.RegistrationRequired())

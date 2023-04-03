@@ -1,6 +1,5 @@
 package com.orels.jeruchess.android.domain
 
-import android.app.Activity
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.main.domain.model.User
@@ -69,9 +68,9 @@ sealed class AuthState(val name: String) {
 }
 
 sealed class AuthEvent {
-    data class LoginWithGoogle(val activity: Activity) : AuthEvent()
     data class LoginWithPhone(val phoneNumber: String) : AuthEvent()
     data class Register(val user: User) : AuthEvent()
-    data class ConfirmCode(val code: String) : AuthEvent()
+    data class ConfirmSignUp(val user: User, val code: String) : AuthEvent()
+    data class ConfirmSignIn(val code: String) : AuthEvent()
     object Logout : AuthEvent()
 }

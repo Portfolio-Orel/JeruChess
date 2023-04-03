@@ -9,6 +9,6 @@ actual class DatabaseDriverFactory (
     private val context: Context
 ){
     actual fun create(): SqlDriver {
-        return AndroidSqliteDriver(JeruChessDatabase.Schema, context, "jeruchess.db")
+        return AndroidSqliteDriver(JeruChessDatabase.Schema, context, "chess.db")
     }
 }

@@ -1,6 +1,7 @@
 package com.orels.jeruchess.android.presentation.auth.register
 
 import com.orels.jeruchess.main.domain.model.Gender
+import com.orels.jeruchess.main.domain.model.User
 
 data class RegisterState(
     val id: String = "",
@@ -13,6 +14,7 @@ data class RegisterState(
     val dateOfBirth: Long = 0L,
     val code: String = "",
 
+    val user: User = User(),
 
     val isLoading: Boolean = false,
 
