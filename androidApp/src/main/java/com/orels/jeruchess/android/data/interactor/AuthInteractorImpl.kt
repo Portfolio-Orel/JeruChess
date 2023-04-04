@@ -148,6 +148,7 @@ class AuthInteractorImpl @Inject constructor(
         }
     }
 
+
     private suspend fun userLoggedIn() {
         try {
             val userId = Amplify.Auth.getCurrentUser().userId
