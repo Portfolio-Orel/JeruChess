@@ -5,6 +5,11 @@ import com.orels.jeruchess.main.domain.model.User
 import kotlinx.serialization.SerialName
 
 @kotlinx.serialization.Serializable
+data class IsUserRegisteredDto(
+    @SerialName("is_registration_completed") val isRegistered: Boolean
+)
+
+@kotlinx.serialization.Serializable
 data class UserDto(
     @SerialName("id") val id: String,
     @SerialName("first_name") val firstName: String = "",

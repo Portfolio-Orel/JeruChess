@@ -32,6 +32,14 @@ class SqlDelightUsersDataSource(
         .executeAsOneOrNull()
         ?.toUser()
 
+    override suspend fun updateUser(user: User) = usersQueries
+        .updateUser(
+            firstName = user.firstName,
+            lastName = user.lastName,
+            dateOfBirth = user.dateOfBirth,
+            gender = user.gender.name,
+        )
+
     override suspend fun getUserFlow(): CommonFlow<User?> =
         usersQueries
             .getUser()

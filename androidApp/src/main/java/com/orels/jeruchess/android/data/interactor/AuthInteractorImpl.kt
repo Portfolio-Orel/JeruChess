@@ -112,17 +112,21 @@ class AuthInteractorImpl @Inject constructor(
             .userAttribute(AuthUserAttributeKey.phoneNumber(), formattedPhoneNumber)
             .userAttribute(AuthUserAttributeKey.email(), user.email)
             .build()
-
-
         try {
-            Amplify.Auth.signUp(
+            val result = Amplify.Auth.signUp(
                 formattedPhoneNumber,
                 PasswordGenerator.generateStrongPassword(),
                 signUpOptions
             )
+            if(result.userId == null) throw Exception("userId is null after sign up")
+            usersClient.createUser(user, result.userId!!)
+            setAuthState(
+                AuthState.RegistrationRequired(),
+                mapOf("phoneNumber" to formattedPhoneNumber)
+            )
         } catch (error: AmplifyException) {
             if (error is UsernameExistsException) {
-                Amplify.Auth.resendSignUpCode(user.email)
+                Amplify.Auth.resendSignUpCode(formattedPhoneNumber)
             } else {
                 handleError(error)
             }
@@ -175,13 +179,38 @@ class AuthInteractorImpl @Inject constructor(
             }
             user.id = userId
             user.token = token
-            usersClient.createUser(user)
-            usersDataSource.saveUser(user)
+            saveUser(user = user)
             setAuthState(
                 AuthState.ConfirmationRequired(),
                 mapOf("email" to user.email, "phoneNumber" to user.phoneNumber)
             )
             setUser()
+            setAuthState(AuthState.LoggedIn)
+        } catch (error: AmplifyException) {
+            handleError(error)
+        } catch (error: Exception) {
+            println()
+        }
+    }
+
+    private suspend fun completeRegistration(user: User) {
+        try {
+            usersClient.completeRegistration(user)
+            usersDataSource.updateUser(user)
+            saveUser(user = user)
+            setAuthState(AuthState.LoggedIn)
+        } catch (error: AmplifyException) {
+            handleError(error)
+        } catch (error: Exception) {
+            println()
+        }
+    }
+
+    private suspend fun updateUser(user: User) {
+        try {
+            usersClient.updateUser(user)
+            usersDataSource.updateUser(user)
+            saveUser(user = user)
             setAuthState(AuthState.LoggedIn)
         } catch (error: AmplifyException) {
             handleError(error)
@@ -209,13 +238,20 @@ class AuthInteractorImpl @Inject constructor(
         )
     }
 
+    private suspend fun saveUser(user: User) = usersDataSource.saveUser(user)
+
     override suspend fun onAuth(authEvent: AuthEvent) {
         when (authEvent) {
             is AuthEvent.LoginWithPhone -> loginWithPhone(authEvent.phoneNumber)
-            is AuthEvent.ConfirmSignUp -> confirmSignUp(user = authEvent.user, code = authEvent.code)
+            is AuthEvent.ConfirmSignUp -> confirmSignUp(
+                user = authEvent.user,
+                code = authEvent.code
+            )
             is AuthEvent.ConfirmSignIn -> confirmSignIn(authEvent.code)
             is AuthEvent.Register -> register(authEvent.user)
             is AuthEvent.Logout -> logout()
+            is AuthEvent.UpdateUser -> updateUser(authEvent.user)
+            is AuthEvent.CompleteRegistration -> completeRegistration(authEvent.user)
         }
     }
 
@@ -226,11 +262,9 @@ class AuthInteractorImpl @Inject constructor(
             false
         }
 
-
     override suspend fun isUserRegistered(userId: String): Boolean =
-        usersClient.getUser(userId) != null
+        usersClient.isUserRegistered(userId)
 
-    override suspend fun saveUser(user: User) = usersDataSource.saveUser(user)
     override suspend fun getUser(): User? = usersDataSource.getUser()
     override suspend fun getAuthState(): CommonFlow<AuthState> =
         try {

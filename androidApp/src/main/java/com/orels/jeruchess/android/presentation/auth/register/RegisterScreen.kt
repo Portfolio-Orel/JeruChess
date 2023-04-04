@@ -47,36 +47,6 @@ import com.orels.jeruchess.utils.Formatters
 import com.orels.jeruchess.utils.Validators
 import java.util.*
 
-private enum class Stage {
-    BASIC_INFORMATION, EMAIL_NUMBER, CONFIRMATION, DONE, ERROR
-}
-
-// this will show the stages order, not as a string
-private val registrationProcess: List<Stage> = listOf(
-    Stage.EMAIL_NUMBER,
-    Stage.CONFIRMATION,
-    Stage.BASIC_INFORMATION,
-    Stage.DONE
-)
-
-private fun Stage.next(): Stage {
-    val nextIndex = registrationProcess.indexOf(this) + 1
-    return if (nextIndex < registrationProcess.size) {
-        registrationProcess[nextIndex]
-    } else {
-        this
-    }
-}
-
-private fun Stage.previous(): Stage {
-    val previousIndex = registrationProcess.indexOf(this) - 1
-    return if (previousIndex >= 0) {
-        registrationProcess[previousIndex]
-    } else {
-        this
-    }
-}
-
 @Composable
 fun RegisterScreen(
     navController: NavController,
@@ -87,7 +57,6 @@ fun RegisterScreen(
     var backPressed by remember { mutableStateOf(false) }
 
     val state = viewModel.state
-    val stage = remember { mutableStateOf(registrationProcess[0]) }
 
     LaunchedEffect(key1 = preInsertedEmail) {
         if (preInsertedEmail.isNotBlank() && preInsertedEmail != Screens.navigationArgumentDefaultValue)
@@ -102,15 +71,15 @@ fun RegisterScreen(
 
     BackPressHandler {
         backPressed = true
-        if (stage.value != (registrationProcess.firstOrNull() ?: Stage.BASIC_INFORMATION)) {
-            stage.value = stage.value.previous()
+        if (state.stage != (registrationProcess.firstOrNull() ?: Stage.BASIC_INFORMATION)) {
+            viewModel.onEvent(RegisterEvent.PreviousStage)
         } else {
             navController.popBackStack()
         }
     }
 
     AnimateContent(
-        shouldShow = stage.value == Stage.BASIC_INFORMATION,
+        shouldShow = state.stage == Stage.BASIC_INFORMATION,
     ) {
         GetBasicInformation(
             gender = state.gender,
@@ -122,37 +91,37 @@ fun RegisterScreen(
                 viewModel.onEvent(RegisterEvent.SetLastName(lastName))
                 viewModel.onEvent(RegisterEvent.SetGender(gender))
                 viewModel.onEvent(RegisterEvent.SetDateOfBirth(dateOfBirth))
-                stage.value = stage.value.next()
-            }
+                viewModel.onEvent(RegisterEvent.CompleteRegistration)
+            },
+            isLoading = state.isLoading,
         )
     }
     AnimateContent(
-        shouldShow = stage.value == Stage.EMAIL_NUMBER,
+        shouldShow = state.stage == Stage.EMAIL_NUMBER,
     ) {
         GetEmailAndPhoneNumber(
             email = state.email,
             phoneNumber = state.phoneNumber,
             isEmailDisabled = preInsertedEmail.isNotBlank(),
             isPhoneNumberDisabled = preInsertedPhoneNumber.isNotBlank(),
+            isLoading = state.isLoading,
             onDetailsEntered = { mail, number ->
                 viewModel.onEvent(RegisterEvent.SetEmail(mail))
                 viewModel.onEvent(RegisterEvent.SetPhoneNumber(number))
-                viewModel.onEvent(RegisterEvent.CompleteRegistration)
-                stage.value = stage.value.next()
+                viewModel.onEvent(RegisterEvent.Register)
             },
             validateEmail = { Validators.isEmailValid(it) },
             validatePhoneNumber = { Validators.isPhoneNumberValid(it) }
         )
     }
 
-    AnimateContent(shouldShow = stage.value == Stage.CONFIRMATION && state.isLoading.not()) {
+    AnimateContent(shouldShow = state.stage == Stage.CONFIRMATION && state.isLoading.not()) {
         ConfirmationCodeDialog {
             viewModel.onEvent(RegisterEvent.ConfirmCode(it))
-            stage.value = stage.value.next()
         }
     }
 
-    AnimateContent(shouldShow = stage.value == Stage.DONE) {
+    AnimateContent(shouldShow = state.stage == Stage.DONE) {
         DoneContent(
             onDone = {
                 navController.navigate(Screens.Main.route) {
@@ -171,6 +140,7 @@ fun GetBasicInformation(
     dateOfBirth: String = "",
     firstName: String = "",
     lastName: String = "",
+    isLoading: Boolean = false
 ) {
     val firstNameValue = remember { mutableStateOf(firstName) }
     val firstNameError = remember { mutableStateOf(false) }
@@ -272,7 +242,8 @@ fun GetBasicInformation(
                     lastNameError.value = lastNameValue.value.isBlank()
                     dateOfBirthError.value = dateOfBirthValue.value.isBlank()
                 }
-            }, text = stringResource(R.string.next)
+            }, text = stringResource(R.string.next),
+            isLoading = isLoading
         )
     }
 }
@@ -285,6 +256,7 @@ fun GetEmailAndPhoneNumber(
     isEmailDisabled: Boolean = false,
     isPhoneNumberDisabled: Boolean = false,
     validatePhoneNumber: (String) -> Boolean,
+    isLoading: Boolean = false,
     email: String = "",
     phoneNumber: String = "",
 ) {
@@ -350,7 +322,8 @@ fun GetEmailAndPhoneNumber(
                     emailError.value = emailValue.value.isBlank()
                     numberError.value = number.value.isBlank()
                 }
-            }, text = stringResource(R.string.next)
+            }, text = stringResource(R.string.next),
+            isLoading = isLoading
         )
     }
 }

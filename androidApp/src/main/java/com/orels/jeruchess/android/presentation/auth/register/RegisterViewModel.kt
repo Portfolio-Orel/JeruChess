@@ -31,8 +31,9 @@ class RegisterViewModel @Inject constructor(
             is RegisterEvent.SetGender -> state = state.copy(gender = event.gender)
             is RegisterEvent.SetDateOfBirth -> state = state.copy(dateOfBirth = event.dateOfBirth)
             is RegisterEvent.Register -> register()
-            is RegisterEvent.CompleteRegistration -> register()
+            is RegisterEvent.CompleteRegistration -> completeRegistration()
             is RegisterEvent.ConfirmCode -> confirmCode(event.code)
+            is RegisterEvent.PreviousStage -> state = state.copy(stage = state.stage.previous())
         }
 
 
@@ -46,7 +47,26 @@ class RegisterViewModel @Inject constructor(
                 )
             )
             withContext(Dispatchers.Main) {
-                state = state.copy(isLoading = false)
+                state = state.copy(isLoading = false, stage = state.stage.next())
+            }
+        }
+    }
+
+    private fun completeRegistration() {
+        state = state.copy(isLoading = true)
+        viewModelScope.launch {
+            authInteractor.onAuth(
+                AuthEvent.CompleteRegistration(
+                    user = User(
+                        firstName = state.firstName,
+                        lastName = state.lastName,
+                        dateOfBirth = state.dateOfBirth,
+                        gender = state.gender
+                    ),
+                )
+            )
+            withContext(Dispatchers.Main) {
+                state = state.copy(isLoading = false, stage = state.stage.next())
             }
         }
     }
@@ -67,7 +87,7 @@ class RegisterViewModel @Inject constructor(
                 AuthEvent.Register(user = user)
             )
             withContext(Dispatchers.Main) {
-                state = state.copy(isLoading = false)
+                state = state.copy(isLoading = false, stage = state.stage.next())
             }
         }
     }

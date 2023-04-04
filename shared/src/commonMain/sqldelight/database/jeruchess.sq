@@ -101,6 +101,13 @@ INSERT OR REPLACE
     token
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+updateUser:
+UPDATE userEntity
+SET firstName = ?,
+    lastName = ?,
+    dateOfBirth = ?,
+    gender = ?;
+
 deleteUser:
 DELETE FROM userEntity;
 

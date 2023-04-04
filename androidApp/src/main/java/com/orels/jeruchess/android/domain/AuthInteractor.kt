@@ -10,7 +10,6 @@ interface AuthInteractor {
     suspend fun onAuth(authEvent: AuthEvent)
     suspend fun isUserLoggedIn(): Boolean
     suspend fun isUserRegistered(userId: String): Boolean
-    suspend fun saveUser(user: User)
     suspend fun getUser(): User?
     suspend fun getAuthState(): CommonFlow<AuthState>
 }
@@ -72,5 +71,7 @@ sealed class AuthEvent {
     data class Register(val user: User) : AuthEvent()
     data class ConfirmSignUp(val user: User, val code: String) : AuthEvent()
     data class ConfirmSignIn(val code: String) : AuthEvent()
+    data class CompleteRegistration(val user: User) : AuthEvent()
+    data class UpdateUser(val user: User) : AuthEvent()
     object Logout : AuthEvent()
 }
