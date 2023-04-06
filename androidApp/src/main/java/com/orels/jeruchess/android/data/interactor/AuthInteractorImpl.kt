@@ -11,6 +11,7 @@ import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
+import com.amplifyframework.auth.cognito.exceptions.service.UserNotConfirmedException
 import com.amplifyframework.auth.cognito.exceptions.service.UsernameExistsException
 import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
 import com.amplifyframework.auth.cognito.options.AuthFlowType
@@ -100,7 +101,7 @@ class AuthInteractorImpl @Inject constructor(
                 .build()
             Amplify.Auth.signIn(formattedPhoneNumber, options = authSignInOptions)
         } catch (error: AmplifyException) {
-            handleError(error)
+            handleError(error, phoneNumber)
         } catch (error: Exception) {
             println()
         }
@@ -141,13 +142,24 @@ class AuthInteractorImpl @Inject constructor(
         setAuthState(AuthState.LoggedOut)
     }
 
-    private suspend fun handleError(error: AmplifyException) {
-        when (error) {
-            is SignedInException -> userLoggedIn()
-            else -> Log.e("MyAmplifyApp", "Could not initialize Amplify", error)
+    private suspend fun handleError(error: AmplifyException, phoneNumber: String = "") {
+        try {
+            when (error) {
+                is SignedInException -> userLoggedIn()
+                is UserNotConfirmedException -> confirmationRequired(phoneNumber)
+                else -> Log.e("MyAmplifyApp", "Unhandled error", error)
+            }
+        } catch (error: Exception) {
+            Log.e("MyAmplifyApp", "Error in handling error", error)
         }
     }
 
+    private suspend fun confirmationRequired(phoneNumber: String) {
+
+        val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
+        Amplify.Auth.resendSignUpCode(formattedPhoneNumber)
+        setAuthState(AuthState.ConfirmationRequired(), mapOf("phoneNumber" to formattedPhoneNumber))
+    }
 
     private suspend fun userLoggedIn() {
         try {

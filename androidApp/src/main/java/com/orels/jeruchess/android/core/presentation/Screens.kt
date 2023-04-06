@@ -47,4 +47,5 @@ enum class Screens(val route: String, @StringRes val label: Int = R.string.empty
 object RoutesArguments {
     const val PRE_INSERTED_PHONE_NUMBER = "preInsertedPhoneNumber"
     const val PRE_INSERTED_EMAIL = "preInsertedEmail"
+    const val CONFIRMATION_ONLY = "confirmationOnly"
 }

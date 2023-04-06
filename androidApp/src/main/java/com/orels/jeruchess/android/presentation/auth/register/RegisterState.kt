@@ -47,6 +47,7 @@ data class RegisterState(
     val user: User = User(),
 
     val stage: Stage = registrationProcess[0],
+    val isConfirmationOnly: Boolean = false,
     val isLoading: Boolean = false,
 
     )

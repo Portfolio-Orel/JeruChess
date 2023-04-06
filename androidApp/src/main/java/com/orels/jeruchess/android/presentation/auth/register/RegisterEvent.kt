@@ -13,5 +13,4 @@ sealed class RegisterEvent {
     data class ConfirmCode(val code: String): RegisterEvent()
     object PreviousStage: RegisterEvent()
     object CompleteRegistration: RegisterEvent()
-    object Register: RegisterEvent()
-}
+    object Register: RegisterEvent() }

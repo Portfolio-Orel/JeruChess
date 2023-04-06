@@ -50,24 +50,11 @@ import java.util.*
 @Composable
 fun RegisterScreen(
     navController: NavController,
-    preInsertedPhoneNumber: String = "",
-    preInsertedEmail: String = "",
     viewModel: RegisterViewModel = hiltViewModel()
 ) {
     var backPressed by remember { mutableStateOf(false) }
 
     val state = viewModel.state
-
-    LaunchedEffect(key1 = preInsertedEmail) {
-        if (preInsertedEmail.isNotBlank() && preInsertedEmail != Screens.navigationArgumentDefaultValue)
-            viewModel.onEvent(RegisterEvent.SetEmail(preInsertedEmail))
-    }
-
-    LaunchedEffect(key1 = preInsertedPhoneNumber) {
-        if (preInsertedPhoneNumber.isNotBlank() && preInsertedEmail != Screens.navigationArgumentDefaultValue) {
-            viewModel.onEvent(RegisterEvent.SetPhoneNumber(preInsertedPhoneNumber))
-        }
-    }
 
     BackPressHandler {
         backPressed = true
@@ -102,8 +89,6 @@ fun RegisterScreen(
         GetEmailAndPhoneNumber(
             email = state.email,
             phoneNumber = state.phoneNumber,
-            isEmailDisabled = preInsertedEmail.isNotBlank(),
-            isPhoneNumberDisabled = preInsertedPhoneNumber.isNotBlank(),
             isLoading = state.isLoading,
             onDetailsEntered = { mail, number ->
                 viewModel.onEvent(RegisterEvent.SetEmail(mail))
