@@ -65,56 +65,75 @@ fun RegisterScreen(
         }
     }
 
-    AnimateContent(
-        shouldShow = state.stage == Stage.BASIC_INFORMATION,
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.Center
     ) {
-        GetBasicInformation(
-            gender = state.gender,
-            firstName = state.firstName,
-            lastName = state.lastName,
-            dateOfBirth = Date(state.dateOfBirth).toString(),
-            onNameEntered = { firstName, lastName, gender, dateOfBirth ->
-                viewModel.onEvent(RegisterEvent.SetFirstName(firstName))
-                viewModel.onEvent(RegisterEvent.SetLastName(lastName))
-                viewModel.onEvent(RegisterEvent.SetGender(gender))
-                viewModel.onEvent(RegisterEvent.SetDateOfBirth(dateOfBirth))
-                viewModel.onEvent(RegisterEvent.CompleteRegistration)
-            },
-            isLoading = state.isLoading,
-        )
-    }
-    AnimateContent(
-        shouldShow = state.stage == Stage.EMAIL_NUMBER,
-    ) {
-        GetEmailAndPhoneNumber(
-            email = state.email,
-            phoneNumber = state.phoneNumber,
-            isLoading = state.isLoading,
-            onDetailsEntered = { mail, number ->
-                viewModel.onEvent(RegisterEvent.SetEmail(mail))
-                viewModel.onEvent(RegisterEvent.SetPhoneNumber(number))
-                viewModel.onEvent(RegisterEvent.Register)
-            },
-            validateEmail = { Validators.isEmailValid(it) },
-            validatePhoneNumber = { Validators.isPhoneNumberValid(it) }
-        )
-    }
-
-    AnimateContent(shouldShow = state.stage == Stage.CONFIRMATION && state.isLoading.not()) {
-        ConfirmationCodeDialog {
-            viewModel.onEvent(RegisterEvent.ConfirmCode(it))
+        AnimateContent(
+            shouldShow = state.stage == Stage.BASIC_INFORMATION,
+        ) {
+            GetBasicInformation(
+                gender = state.gender,
+                firstName = state.firstName,
+                lastName = state.lastName,
+                dateOfBirth = Date(state.dateOfBirth).toString(),
+                onNameEntered = { firstName, lastName, gender, dateOfBirth ->
+                    viewModel.onEvent(RegisterEvent.SetFirstName(firstName))
+                    viewModel.onEvent(RegisterEvent.SetLastName(lastName))
+                    viewModel.onEvent(RegisterEvent.SetGender(gender))
+                    viewModel.onEvent(RegisterEvent.SetDateOfBirth(dateOfBirth))
+                    viewModel.onEvent(RegisterEvent.CompleteRegistration)
+                },
+                isLoading = state.isLoading,
+            )
         }
-    }
+        AnimateContent(
+            shouldShow = state.stage == Stage.EMAIL_NUMBER,
+        ) {
+            GetEmailAndPhoneNumber(
+                email = state.email,
+                phoneNumber = state.phoneNumber,
+                isLoading = state.isLoading,
+                onDetailsEntered = { mail, number ->
+                    viewModel.onEvent(RegisterEvent.SetEmail(mail))
+                    viewModel.onEvent(RegisterEvent.SetPhoneNumber(number))
+                    viewModel.onEvent(RegisterEvent.Register)
+                },
+                validateEmail = { Validators.isEmailValid(it) },
+                validatePhoneNumber = { Validators.isPhoneNumberValid(it) }
+            )
+        }
 
-    AnimateContent(shouldShow = state.stage == Stage.DONE) {
-        DoneContent(
-            onDone = {
-                navController.navigate(Screens.Main.route) {
-                    popUpTo(Screens.Register.route) { inclusive = true }
-                }
-            },
-            isLoading = state.isLoading
-        )
+        AnimateContent(shouldShow = state.stage == Stage.CONFIRMATION && state.isLoading.not()) {
+            ConfirmationCodeDialog {
+                viewModel.onEvent(RegisterEvent.ConfirmCode(it))
+            }
+        }
+
+        AnimateContent(shouldShow = state.stage == Stage.DONE) {
+            DoneContent(
+                onDone = {
+                    navController.navigate(Screens.Main.route) {
+                        popUpTo(Screens.Register.route) { inclusive = true }
+                    }
+                },
+                isLoading = state.isLoading
+            )
+
+//            if (state.error != null) {
+//                Text(
+//                    text = stringResource(id = state.error),
+//                    color = MaterialTheme.colors.error,
+//                    modifier = Modifier
+//                        .padding(16.dp)
+//                        .fillMaxWidth()
+//                        .wrapContentHeight()
+//                        .background(MaterialTheme.colors.background)
+//                )
+//            }
+        }
     }
 }
 

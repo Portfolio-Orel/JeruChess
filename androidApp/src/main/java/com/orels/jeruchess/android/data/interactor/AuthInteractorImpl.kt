@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.amplifyframework.AmplifyException
+import com.amplifyframework.auth.AuthUserAttribute
 import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
@@ -110,16 +111,19 @@ class AuthInteractorImpl @Inject constructor(
     private suspend fun register(user: User) {
         val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(user.phoneNumber, "IL")
         val signUpOptions = AuthSignUpOptions.builder()
-            .userAttribute(AuthUserAttributeKey.phoneNumber(), formattedPhoneNumber)
-            .userAttribute(AuthUserAttributeKey.email(), user.email)
-            .build()
+            .userAttributes(
+                mutableListOf(
+                    AuthUserAttribute(AuthUserAttributeKey.email(), user.email),
+                    AuthUserAttribute(AuthUserAttributeKey.phoneNumber(), formattedPhoneNumber)
+                )
+            ).build()
         try {
             val result = Amplify.Auth.signUp(
                 formattedPhoneNumber,
                 PasswordGenerator.generateStrongPassword(),
                 signUpOptions
             )
-            if(result.userId == null) throw Exception("userId is null after sign up")
+            if (result.userId == null) throw Exception("userId is null after sign up")
             usersClient.createUser(user, result.userId!!)
             setAuthState(
                 AuthState.RegistrationRequired(),

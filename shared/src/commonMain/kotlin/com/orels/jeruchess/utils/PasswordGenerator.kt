@@ -28,7 +28,5 @@ class PasswordGenerator {
 
             return password
         }
-
-
     }
 }
