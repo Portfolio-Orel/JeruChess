@@ -5,16 +5,19 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +34,7 @@ import com.orels.jeruchess.android.presentation.components.Input
 import com.orels.jeruchess.android.presentation.components.Loading
 import com.orels.jeruchess.android.presentation.components.noRippleClickable
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreen(
     navController: NavController,
@@ -38,8 +42,8 @@ fun LoginScreen(
 ) {
     val state = viewModel.state
     val context = LocalContext.current
-
-    val phoneNumber = remember { mutableStateOf("") }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val email = remember { mutableStateOf("") }
 
     LaunchedEffect(key1 = state.authState) {
         if (state.authState is AuthState.RegistrationRequired) {
@@ -75,21 +79,32 @@ fun LoginScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 Input(
-                    title = stringResource(R.string.phone_number),
-                    placeholder = stringResource(R.string.phone_number),
+                    title = stringResource(R.string.email),
+                    placeholder = stringResource(R.string.email),
                     initialText = "",
-                    keyboardType = CustomKeyboardType.Phone,
+                    keyboardType = CustomKeyboardType.Email,
+                    keyboardActions = KeyboardActions(onDone = {
+                        viewModel.onEvent(LoginEvent.Login(email.value))
+                        keyboard?.hide()
+                    }),
                     isPassword = false,
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Filled.Phone,
-                            stringResource(R.string.phone_number)
+                            imageVector = Icons.Filled.Email,
+                            stringResource(R.string.email)
                         )
                     },
                     onTextChange = {
-                        phoneNumber.value = it
+                        email.value = it
                     }
                 )
+                if(state.error != null) {
+                    Text(
+                        text = stringResource(state.error),
+                        style = MaterialTheme.typography.body2,
+                        color = MaterialTheme.colors.error
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 AppLogo()
                 Spacer(modifier = Modifier.weight(1f))
@@ -133,7 +148,7 @@ fun LoginScreen(
                         (context as? Activity)?.let {
                             viewModel.onEvent(
                                 LoginEvent.Login(
-                                    phoneNumber = phoneNumber.value,
+                                    email = email.value,
                                 ),
                             )
                         }
@@ -159,11 +174,6 @@ fun LoginScreen(
                         )
                     }
                 }
-                Text(
-                    text = state.error ?: "",
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.error
-                )
             }
         }
     }

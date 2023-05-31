@@ -3,6 +3,7 @@ package com.orels.jeruchess.android.presentation.components
 
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -35,6 +36,7 @@ fun Input(
     isPassword: Boolean = false,
     shouldFocus: Boolean = false,
     keyboardType: CustomKeyboardType = CustomKeyboardType.Text,
+    keyboardActions: KeyboardActions = KeyboardActions(),
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = { },
     value: String = "",
@@ -97,6 +99,7 @@ fun Input(
                 keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions(
                     keyboardType = keyboardType.type
                 ),
+                keyboardActions = keyboardActions,
                 trailingIcon = {
                     if (isPassword) {
                         PasswordIcon(

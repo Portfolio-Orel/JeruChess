@@ -5,10 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.domain.AuthEvent
 import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.android.domain.AuthState
+import com.orels.jeruchess.android.domain.exceptions.UserNotFoundException
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,11 +35,21 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun loginWithPhone(phoneNumber: String) {
+    private fun loginWithEmail(email: String) {
         state = state.copy(isLoadingLogin = true)
-        viewModelScope.launch {
-            authInteractor.onAuth(AuthEvent.LoginWithPhone(phoneNumber))
+        val loginJob = viewModelScope.async {
+            authInteractor.onAuth(AuthEvent.LoginWithEmail(email))
             state = state.copy(isLoadingLogin = false)
+        }
+        viewModelScope.launch {
+            try {
+                loginJob.await()
+            } catch (e: Exception) {
+                state = when(e) {
+                    is UserNotFoundException -> state.copy(error = R.string.user_not_found, isLoadingLogin = false)
+                    else -> state.copy(isLoadingLogin = false)
+                }
+            }
         }
     }
 
@@ -48,7 +61,7 @@ class LoginViewModel @Inject constructor(
 
     fun onEvent(event: LoginEvent) {
         when (event) {
-            is LoginEvent.Login -> loginWithPhone(event.phoneNumber)
+            is LoginEvent.Login -> loginWithEmail(event.email)
             is LoginEvent.Register -> state =
                 state.copy(authState = AuthState.RegistrationRequired())
             is LoginEvent.Logout -> logout()

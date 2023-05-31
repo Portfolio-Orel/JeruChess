@@ -15,6 +15,7 @@ class KtorUsersClient(
     private val baseUrl = "users"
     private val json = Json {
         ignoreUnknownKeys = true
+
     }
     override suspend fun createUser(user: User ,userId: String): User {
         try {

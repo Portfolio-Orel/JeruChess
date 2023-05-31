@@ -68,6 +68,7 @@ sealed class AuthState(val name: String) {
 
 sealed class AuthEvent {
     data class LoginWithPhone(val phoneNumber: String) : AuthEvent()
+    data class LoginWithEmail(val email: String): AuthEvent()
     data class Register(val user: User) : AuthEvent()
     data class ConfirmSignUp(val user: User, val code: String) : AuthEvent()
     data class ConfirmSignIn(val code: String) : AuthEvent()
