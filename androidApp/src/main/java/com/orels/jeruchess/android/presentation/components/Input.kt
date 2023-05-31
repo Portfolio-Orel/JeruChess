@@ -1,8 +1,8 @@
 package com.orels.jeruchess.android.presentation.components
 
 
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -33,23 +33,24 @@ fun Input(
     maxCharacters: Int? = null,
     isError: Boolean = false,
     isPassword: Boolean = false,
-    shouldFocus: Boolean = false,
     keyboardType: CustomKeyboardType = CustomKeyboardType.Text,
+    keyboardActions: KeyboardActions = KeyboardActions(),
     leadingIcon: (@Composable (() -> Unit))? = null,
     trailingIcon: (@Composable (() -> Unit))? = { },
     value: String = "",
     onTextChange: (String) -> Unit = {},
     isDisabled: Boolean = false,
-    formatter: (String) -> String = { it }
-) {
-    val textFieldValueState = remember { mutableStateOf(TextFieldValue(value)) }
+    formatter: (String) -> String = { it },
+    focusRequester: FocusRequester = FocusRequester(),
+
+    ) {
+    val textFieldValueState = remember { mutableStateOf(TextFieldValue(value.ifBlank { initialText })) }
     val previousText = remember { mutableStateOf(initialText) }
 
     val passwordVisible = rememberSaveable { mutableStateOf(false) }
     val lineHeight = 40
-    val focusRequester = FocusRequester()
 
-    var inputModifier = if (shouldFocus) Modifier.focusRequester(focusRequester) else Modifier
+    var inputModifier = Modifier.focusRequester(focusRequester)
     val maxWidth = if (maxCharacters != null) (maxCharacters * 75).dp else null
 
     inputModifier =
@@ -66,8 +67,7 @@ fun Input(
         Box(modifier = Modifier.zIndex(1f)) {
             OutlinedTextField(
                 modifier = inputModifier
-                    .fillMaxWidth()
-                    .focusable(enabled = shouldFocus),
+                    .fillMaxWidth(),
                 value = textFieldValueState.value,
                 onValueChange = {
                     if (previousText.value == it.text) return@OutlinedTextField
@@ -97,6 +97,7 @@ fun Input(
                 keyboardOptions = if (isPassword) KeyboardOptions(keyboardType = KeyboardType.Password) else KeyboardOptions(
                     keyboardType = keyboardType.type
                 ),
+                keyboardActions = keyboardActions,
                 trailingIcon = {
                     if (isPassword) {
                         PasswordIcon(

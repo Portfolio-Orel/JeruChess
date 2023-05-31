@@ -92,13 +92,16 @@ fun RegisterScreen(
         AnimateContent(
             shouldShow = state.stage == Stage.EMAIL_NUMBER,
         ) {
-            GetEmailAndPhoneNumber(
-                email = state.email,
-                phoneNumber = state.phoneNumber,
+            GetLoginDetails(
+                initialEmail = state.email,
+                initialPhoneNumber = state.phoneNumber,
                 isLoading = state.isLoading,
-                onDetailsEntered = { mail, number ->
+                onDetailsEntered = { mail, number, username, password, confirmPassword ->
                     viewModel.onEvent(RegisterEvent.SetEmail(mail))
                     viewModel.onEvent(RegisterEvent.SetPhoneNumber(number))
+                    viewModel.onEvent(RegisterEvent.SetUsername(username))
+                    viewModel.onEvent(RegisterEvent.SetPassword(password))
+                    viewModel.onEvent(RegisterEvent.SetConfirmPassword(confirmPassword))
                     viewModel.onEvent(RegisterEvent.Register)
                 },
                 validateEmail = { Validators.isEmailValid(it) },
@@ -254,20 +257,37 @@ fun GetBasicInformation(
 
 
 @Composable
-fun GetEmailAndPhoneNumber(
-    onDetailsEntered: (email: String, number: String) -> Unit,
+fun GetLoginDetails(
+    onDetailsEntered: (email: String, number: String, username: String, password: String, confirmPassword: String) -> Unit,
     validateEmail: (String) -> Boolean,
     isEmailDisabled: Boolean = false,
     isPhoneNumberDisabled: Boolean = false,
     validatePhoneNumber: (String) -> Boolean,
     isLoading: Boolean = false,
-    email: String = "",
-    phoneNumber: String = "",
-) {
-    val number = remember { mutableStateOf(phoneNumber) }
-    val numberError = remember { mutableStateOf(false) }
-    val emailValue = remember { mutableStateOf(email) }
+    initialEmail: String = "thischessapp@gmail.com",
+    initialPhoneNumber: String = "0543056286",
+    initialUsername: String = "orelz7",
+    ) {
+
+    val phoneNumber = remember { mutableStateOf(initialPhoneNumber) }
+    val phoneNumberError = remember { mutableStateOf(false) }
+    val phoneNumberFocusRequest = remember { FocusRequester() }
+
+    val emailValue = remember { mutableStateOf(initialEmail) }
     val emailError = remember { mutableStateOf(false) }
+    val emailFocusRequester = remember { FocusRequester() }
+
+    val usernameValue = remember { mutableStateOf(initialUsername) }
+    val usernameError = remember { mutableStateOf(false) }
+    val usernameFocusRequester = remember { FocusRequester() }
+
+    val passwordValue = remember { mutableStateOf("00220022") }
+    val passwordError = remember { mutableStateOf(false) }
+    val passwordFocusRequester = remember { FocusRequester() }
+
+    val confirmPasswordValue = remember { mutableStateOf("00220022") }
+    val confirmPasswordError = remember { mutableStateOf(false) }
+    val confirmPasswordFocusRequester = remember { FocusRequester() }
 
     Column(
         modifier = Modifier
@@ -287,44 +307,121 @@ fun GetEmailAndPhoneNumber(
             minLines = 1,
             maxLines = 1,
             isError = emailError.value,
-            initialText = emailValue.value,
+            initialText = "adsfkasdmfklasd",
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    phoneNumberFocusRequest.requestFocus()
+                }
+            ),
             isPassword = false,
             onTextChange = {
                 emailValue.value = it
                 emailError.value = false
             },
-            isDisabled = isEmailDisabled
+            isDisabled = isEmailDisabled,
+            keyboardType = CustomKeyboardType.Email,
+            focusRequester = emailFocusRequester,
         )
         Input(
             title = stringResource(R.string.phone_number),
             minLines = 1,
             maxLines = 1,
-            isError = numberError.value,
-            initialText = number.value,
+            isError = phoneNumberError.value,
+            initialText = phoneNumber.value,
+            keyboardActions = KeyboardActions(
+                onNext = {
+                    usernameFocusRequester.requestFocus()
+                }
+            ),
             isPassword = false,
             onTextChange = {
-                number.value = it
+                phoneNumber.value = it
             },
             keyboardType = CustomKeyboardType.Phone,
-            isDisabled = isPhoneNumberDisabled
+            isDisabled = isPhoneNumberDisabled,
+            focusRequester = phoneNumberFocusRequest,
+        )
+        Input(
+            title = stringResource(R.string.username),
+            minLines = 1,
+            maxLines = 1,
+            isError = usernameError.value,
+            initialText = usernameValue.value,
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    passwordFocusRequester.requestFocus()
+                }
+            ),
+            isPassword = false,
+            onTextChange = {
+                usernameValue.value = it
+            },
+            focusRequester = usernameFocusRequester,
+        )
+        Input(
+            title = stringResource(R.string.password),
+            minLines = 1,
+            maxLines = 1,
+            isError = passwordError.value,
+            initialText = passwordValue.value,
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    confirmPasswordFocusRequester.requestFocus()
+                }
+            ),
+            isPassword = true,
+            onTextChange = {
+                passwordValue.value = it
+            },
+            focusRequester = passwordFocusRequester,
+        )
+        Input(
+            title = stringResource(R.string.confirm_password),
+            minLines = 1,
+            maxLines = 1,
+            isError = confirmPasswordError.value,
+            initialText = confirmPasswordValue.value,
+            isPassword = true,
+            onTextChange = {
+                confirmPasswordValue.value = it
+            },
+            focusRequester = confirmPasswordFocusRequester,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
         ActionButton(
             onClick = {
                 emailError.value = false
-                numberError.value = false
+                phoneNumberError.value = false
                 if (!validateEmail(emailValue.value)) {
                     emailError.value = true
                 }
-                if (!validatePhoneNumber(number.value)) {
-                    numberError.value = true
+                if (!validatePhoneNumber(phoneNumber.value)) {
+                    phoneNumberError.value = true
                 }
-                if (!emailError.value && !numberError.value && emailValue.value.isNotBlank() && number.value.isNotBlank()) {
-                    onDetailsEntered(emailValue.value, number.value)
+                if (!emailError.value &&
+                    !phoneNumberError.value &&
+                    !usernameError.value &&
+                    !passwordError.value &&
+                    !confirmPasswordError.value &&
+                    usernameValue.value.isNotBlank() &&
+                    passwordValue.value.isNotBlank() &&
+                    confirmPasswordValue.value.isNotBlank() &&
+                    emailValue.value.isNotBlank() &&
+                    phoneNumber.value.isNotBlank()) {
+                    onDetailsEntered(
+                        emailValue.value,
+                        phoneNumber.value,
+                        usernameValue.value,
+                        passwordValue.value,
+                        confirmPasswordValue.value
+                    )
                 } else {
                     emailError.value = emailValue.value.isBlank()
-                    numberError.value = number.value.isBlank()
+                    phoneNumberError.value = phoneNumber.value.isBlank()
+                    usernameError.value = usernameValue.value.isBlank()
+                    passwordError.value = passwordValue.value.isBlank()
+                    confirmPasswordError.value = confirmPasswordValue.value.isBlank()
                 }
             }, text = stringResource(R.string.next),
             isLoading = isLoading
@@ -351,7 +448,7 @@ fun ConfirmationCodeDialog(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.insert_sms_or_mail_code),
+            text = stringResource(R.string.insert_email_code),
             style = MaterialTheme.typography.h4,
             color = MaterialTheme.colors.onBackground
         )

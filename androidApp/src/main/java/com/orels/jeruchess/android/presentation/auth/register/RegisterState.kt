@@ -1,5 +1,6 @@
 package com.orels.jeruchess.android.presentation.auth.register
 
+import androidx.annotation.StringRes
 import com.orels.jeruchess.main.domain.model.Gender
 import com.orels.jeruchess.main.domain.model.User
 
@@ -10,7 +11,7 @@ enum class Stage {
 // this will show the stages order, not as a string
 val registrationProcess: List<Stage> = listOf(
     Stage.EMAIL_NUMBER,
-    Stage.CONFIRMATION,
+//    Stage.CONFIRMATION,
     Stage.BASIC_INFORMATION,
     Stage.DONE
 )
@@ -35,11 +36,14 @@ fun Stage.previous(): Stage {
 
 data class RegisterState(
     val id: String = "",
+    val username: String = "orelz",
+    val password: String = "00220022",
+    val confirmPassword: String = "00220022",
     val firstName: String = "",
     val lastName: String = "",
-    val email: String = "",
+    val email: String = "thischessapp@gmail.com",
     val gender: Gender = Gender.None,
-    val phoneNumber: String = "",
+    val phoneNumber: String = "0543056286",
     val playerNumber: String = "", // TODO
     val dateOfBirth: Long = 0L,
     val code: String = "",
@@ -49,5 +53,7 @@ data class RegisterState(
     val stage: Stage = registrationProcess[0],
     val isConfirmationOnly: Boolean = false,
     val isLoading: Boolean = false,
+
+    @StringRes val error: Int = 0
 
     )

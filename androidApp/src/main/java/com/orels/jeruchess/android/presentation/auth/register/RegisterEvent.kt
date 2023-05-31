@@ -3,6 +3,9 @@ package com.orels.jeruchess.android.presentation.auth.register
 import com.orels.jeruchess.main.domain.model.Gender
 
 sealed class RegisterEvent {
+    data class SetUsername(val username: String): RegisterEvent()
+    data class SetPassword(val password: String): RegisterEvent()
+    data class SetConfirmPassword(val confirmPassword: String): RegisterEvent()
     data class SetPhoneNumber(val phoneNumber: String): RegisterEvent()
     data class SetPlayerNumber(val playerNumber: String): RegisterEvent()
     data class SetFirstName(val firstName: String): RegisterEvent()

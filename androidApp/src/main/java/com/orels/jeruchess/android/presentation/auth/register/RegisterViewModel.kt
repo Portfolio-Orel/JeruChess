@@ -5,11 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.orels.jeruchess.android.R
 import com.orels.jeruchess.android.domain.AuthEvent
 import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.main.domain.model.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -34,6 +36,10 @@ class RegisterViewModel @Inject constructor(
             is RegisterEvent.CompleteRegistration -> completeRegistration()
             is RegisterEvent.ConfirmCode -> confirmCode(event.code)
             is RegisterEvent.PreviousStage -> state = state.copy(stage = state.stage.previous())
+            is RegisterEvent.SetConfirmPassword -> state =
+                state.copy(confirmPassword = event.confirmPassword)
+            is RegisterEvent.SetPassword -> state = state.copy(password = event.password)
+            is RegisterEvent.SetUsername -> state = state.copy(username = event.username)
         }
 
 
@@ -72,7 +78,7 @@ class RegisterViewModel @Inject constructor(
     }
 
     private fun register() {
-        viewModelScope.launch {
+        val registerJob = viewModelScope.async {
             val user = User(
                 phoneNumber = state.phoneNumber,
                 playerNumber = state.playerNumber,
@@ -84,10 +90,19 @@ class RegisterViewModel @Inject constructor(
             )
             state = state.copy(isLoading = true, user = user)
             authInteractor.onAuth(
-                AuthEvent.Register(user = user)
+                AuthEvent.Register(user = user, username = state.username, password = state.password)
             )
             withContext(Dispatchers.Main) {
                 state = state.copy(isLoading = false, stage = state.stage.next())
+            }
+        }
+        viewModelScope.launch {
+            try {
+                registerJob.await()
+            } catch (e: Exception) {
+                state = state.copy(isLoading = false, error = R.string.error_unknown)
+            } finally {
+                state = state.copy(isLoading = false)
             }
         }
     }

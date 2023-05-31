@@ -12,7 +12,6 @@ import com.amplifyframework.auth.AuthUserAttributeKey
 import com.amplifyframework.auth.cognito.AWSCognitoAuthPlugin
 import com.amplifyframework.auth.cognito.AWSCognitoAuthSession
 import com.amplifyframework.auth.cognito.exceptions.invalidstate.SignedInException
-import com.amplifyframework.auth.cognito.exceptions.service.UserNotConfirmedException
 import com.amplifyframework.auth.cognito.exceptions.service.UsernameExistsException
 import com.amplifyframework.auth.cognito.options.AWSCognitoAuthSignInOptions
 import com.amplifyframework.auth.cognito.options.AuthFlowType
@@ -22,13 +21,16 @@ import com.amplifyframework.kotlin.core.Amplify
 import com.orels.jeruchess.android.domain.AuthEvent
 import com.orels.jeruchess.android.domain.AuthInteractor
 import com.orels.jeruchess.android.domain.AuthState
+import com.orels.jeruchess.android.domain.exceptions.PhoneNumberRequiredException
+import com.orels.jeruchess.android.domain.exceptions.UnknownAuthException
+import com.orels.jeruchess.android.domain.exceptions.UserAlreadyExistsException
+import com.orels.jeruchess.android.domain.exceptions.UserNotFoundException
 import com.orels.jeruchess.android.domain.model.ConfigFile
 import com.orels.jeruchess.core.util.CommonFlow
 import com.orels.jeruchess.core.util.toCommonFlow
 import com.orels.jeruchess.main.domain.data.users.UsersClient
 import com.orels.jeruchess.main.domain.data.users.UsersDataSource
 import com.orels.jeruchess.main.domain.model.User
-import com.orels.jeruchess.utils.PasswordGenerator
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -102,41 +104,69 @@ class AuthInteractorImpl @Inject constructor(
                 .build()
             Amplify.Auth.signIn(formattedPhoneNumber, options = authSignInOptions)
         } catch (error: AmplifyException) {
-            handleError(error, phoneNumber)
+            when(error) {
+                is com.amplifyframework.auth.cognito.exceptions.service.UserNotFoundException -> {
+                    throw UserNotFoundException
+                }
+                else -> handleError(error)
+            }
+            handleError(error)
         } catch (error: Exception) {
             println()
         }
     }
 
-    private suspend fun register(user: User) {
+    private suspend fun loginWithEmail(email: String) {
+        try {
+            val authSignInOptions = AWSCognitoAuthSignInOptions.builder()
+                .authFlowType(AuthFlowType.CUSTOM_AUTH_WITHOUT_SRP)
+                .build()
+            val result = Amplify.Auth.signIn(email, options = authSignInOptions)
+            println()
+        } catch (e: Exception) {
+            val x = e
+            println()
+        }
+    }
+
+    private suspend fun register(user: User, username: String, password: String) {
         val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(user.phoneNumber, "IL")
+        if (formattedPhoneNumber.isEmpty()) {
+            // handle invalid phone number case
+            throw PhoneNumberRequiredException
+        }
         val signUpOptions = AuthSignUpOptions.builder()
-            .userAttributes(
-                mutableListOf(
-                    AuthUserAttribute(AuthUserAttributeKey.email(), user.email),
-                    AuthUserAttribute(AuthUserAttributeKey.phoneNumber(), formattedPhoneNumber)
-                )
-            ).build()
+            .userAttributes(listOf(
+                AuthUserAttribute(AuthUserAttributeKey.email(), user.email),
+                AuthUserAttribute(AuthUserAttributeKey.phoneNumber(), formattedPhoneNumber)
+            ))
+            .build()
         try {
             val result = Amplify.Auth.signUp(
-                formattedPhoneNumber,
-                PasswordGenerator.generateStrongPassword(),
+                username,
+                password,
                 signUpOptions
             )
-            if (result.userId == null) throw Exception("userId is null after sign up")
+            if(result.userId == null) {
+                // log unknown exception
+                throw UnknownAuthException
+            }
             usersClient.createUser(user, result.userId!!)
             setAuthState(
                 AuthState.RegistrationRequired(),
                 mapOf("phoneNumber" to formattedPhoneNumber)
             )
         } catch (error: AmplifyException) {
-            if (error is UsernameExistsException) {
-                Amplify.Auth.resendSignUpCode(formattedPhoneNumber)
-            } else {
-                handleError(error)
+            when (error) {
+                is UsernameExistsException -> {
+                    Amplify.Auth.resendSignUpCode(formattedPhoneNumber)
+                    throw UserAlreadyExistsException
+                }
+                else -> handleError(error)
             }
         } catch (error: Exception) {
-            println()
+            // log
+            throw UnknownAuthException
         }
     }
 
@@ -146,24 +176,16 @@ class AuthInteractorImpl @Inject constructor(
         setAuthState(AuthState.LoggedOut)
     }
 
-    private suspend fun handleError(error: AmplifyException, phoneNumber: String = "") {
-        try {
-            when (error) {
-                is SignedInException -> userLoggedIn()
-                is UserNotConfirmedException -> confirmationRequired(phoneNumber)
-                else -> Log.e("MyAmplifyApp", "Unhandled error", error)
+    private suspend fun handleError(error: AmplifyException) {
+        when (error) {
+            is SignedInException -> userLoggedIn()
+            else -> {
+                Log.e("MyAmplifyApp", "Could not initialize Amplify", error)
+                throw UnknownAuthException
             }
-        } catch (error: Exception) {
-            Log.e("MyAmplifyApp", "Error in handling error", error)
         }
     }
 
-    private suspend fun confirmationRequired(phoneNumber: String) {
-
-        val formattedPhoneNumber = PhoneNumberUtils.formatNumberToE164(phoneNumber, "IL")
-        Amplify.Auth.resendSignUpCode(formattedPhoneNumber)
-        setAuthState(AuthState.ConfirmationRequired(), mapOf("phoneNumber" to formattedPhoneNumber))
-    }
 
     private suspend fun userLoggedIn() {
         try {
@@ -260,12 +282,13 @@ class AuthInteractorImpl @Inject constructor(
     override suspend fun onAuth(authEvent: AuthEvent) {
         when (authEvent) {
             is AuthEvent.LoginWithPhone -> loginWithPhone(authEvent.phoneNumber)
+            is AuthEvent.Login -> loginWithEmail(authEvent.email)
             is AuthEvent.ConfirmSignUp -> confirmSignUp(
                 user = authEvent.user,
                 code = authEvent.code
             )
             is AuthEvent.ConfirmSignIn -> confirmSignIn(authEvent.code)
-            is AuthEvent.Register -> register(authEvent.user)
+            is AuthEvent.Register -> register(authEvent.user, authEvent.username, authEvent.password)
             is AuthEvent.Logout -> logout()
             is AuthEvent.UpdateUser -> updateUser(authEvent.user)
             is AuthEvent.CompleteRegistration -> completeRegistration(authEvent.user)
